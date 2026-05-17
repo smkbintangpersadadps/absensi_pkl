@@ -350,29 +350,25 @@
                 </table>
             </section>
 
-            <!-- MOBILE USER HEADER -->
-<!-- <div class="p-4 bg-white shadow-md md:hidden">
-    <h2 id="nav-user-name" class="font-bold text-lg"></h2>
-    <p id="nav-user-role" class="text-sm text-gray-500"></p>
-    <p id="nav-user-kategori" class="text-sm text-gray-400"></p>
-</div> -->
-
-<!-- BOTTOM NAV -->
-<div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around p-2">
-
-    <button onclick="navigateTo('page-user-dashboard')" class="text-center text-xs">
-        🏠<br>Home
-    </button>
-
-    <button onclick="navigateTo('page-user-absen')" class="text-center text-xs">
-        📷<br>Absen
-    </button>
-
-    <button onclick="navigateTo('page-history')" class="text-center text-xs">
-        📊<br>Riwayat
-    </button>
-
-</div>
+        <!-- BOTTOM NAV -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex justify-around py-2">
+        
+            <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span>Home</span>
+            </button>
+        
+            <button onclick="navigateTo('page-user-absen')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-camera text-lg"></i>
+                <span>Absen</span>
+            </button>
+        
+            <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <span>Riwayat</span>
+            </button>
+        
+        </div>
 
         </main>
     </div>
