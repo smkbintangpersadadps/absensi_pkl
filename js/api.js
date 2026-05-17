@@ -1,0 +1,148 @@
+// ===============================
+// API SERVICE
+// ===============================
+
+const ApiService = {
+
+    async call(payload) {
+        if (CONFIG.IS_PREVIEW) {
+            return this.mock(payload);
+        }
+
+        try {
+            const response = await fetch(CONFIG.GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                return result.data;
+            }
+
+            throw new Error(result.message);
+
+        } catch (error) {
+            console.error("API Error:", error);
+            throw error;
+        }
+    },
+
+    async mock(payload) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const action = payload.action;
+
+                try {
+
+                    switch (action) {
+
+                        case 'login':
+                            const user = DummyData.users.find(
+                                u =>
+                                    u.username === payload.username &&
+                                    u.password === payload.password
+                            );
+
+                            if (!user) {
+                                throw new Error("Username atau password salah");
+                            }
+
+                            resolve({
+                                username: user.username,
+                                role: user.role,
+                                nama: user.nama,
+                                kategori: user.kategori
+                            });
+                            break;
+
+                        case 'get_settings':
+                            resolve(AppState.appSettings);
+                            break;
+
+                        case 'save_settings':
+                            AppState.appSettings = {
+                                lat: parseFloat(payload.lat),
+                                lng: parseFloat(payload.lng),
+                                radius: parseInt(payload.radius)
+                            };
+                            resolve("Pengaturan tersimpan");
+                            break;
+
+                        case 'get_users':
+                            resolve(
+                                DummyData.users.filter(
+                                    u => u.role === 'peserta'
+                                )
+                            );
+                            break;
+
+                        case 'save_user':
+                            DummyData.users.push({
+                                username: payload.username,
+                                password: payload.password,
+                                role: 'peserta',
+                                nama: payload.nama,
+                                kategori: payload.kategori
+                            });
+
+                            resolve("Peserta ditambahkan");
+                            break;
+
+                        case 'delete_user':
+                            DummyData.users =
+                                DummyData.users.filter(
+                                    u => u.username !== payload.username
+                                );
+
+                            resolve("Peserta dihapus");
+                            break;
+
+                        case 'get_riwayat':
+                            if (payload.role === 'admin') {
+                                resolve(DummyData.riwayat);
+                            } else {
+                                resolve(
+                                    DummyData.riwayat.filter(
+                                        r =>
+                                            r.username === payload.username
+                                    )
+                                );
+                            }
+                            break;
+
+                        case 'submit_absen':
+                            const now = new Date();
+
+                            const newData = {
+                                id: "ABS-" + Date.now(),
+                                timestamp: now.toLocaleString('id-ID'),
+                                username: payload.username,
+                                nama: payload.nama,
+                                kategori: payload.kategori,
+                                tipe: payload.tipe,
+                                fotoUrl: "dummy.jpg",
+                                lat: payload.lat,
+                                lng: payload.lng,
+                                jarak: payload.jarak
+                            };
+
+                            DummyData.riwayat.unshift(newData);
+
+                            resolve("Absensi berhasil");
+                            break;
+
+                        default:
+                            throw new Error("Action tidak dikenali");
+                    }
+
+                } catch (err) {
+                    reject(err);
+                }
+
+            }, 300);
+        });
+    }
+
+};

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Selfie + Lokasi</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-slate-100">
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-6 right-6 opacity-0 z-50"></div>
+
+    <!-- LOADER -->
+    <div id="global-loader" class="hidden-page">
+        <div class="loader-box">
+            <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-600"></i>
+            <p id="loader-text">Memproses...</p>
+        </div>
+    </div>
+
+    <!-- ================= LOGIN ================= -->
+    <section id="page-login"
+        class="min-h-screen flex items-center justify-center">
+
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+            <h1 class="text-2xl font-bold text-center mb-6">
+                Login Absensi
+            </h1>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <input id="login-username"
+                    type="text"
+                    placeholder="Username"
+                    class="w-full border p-3 rounded-xl mb-4">
+
+                <input id="login-password"
+                    type="password"
+                    placeholder="Password"
+                    class="w-full border p-3 rounded-xl mb-4">
+
+                <button
+                    class="w-full bg-indigo-600 text-white p-3 rounded-xl">
+                    Login
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ================= MAIN APP ================= -->
+    <div id="layout-main" class="hidden-page">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+    class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg p-6
+           hidden md:block">
+
+            <div class="mb-8">
+                <h2 id="nav-user-name" class="font-bold text-lg"></h2>
+                <p id="nav-user-role"
+                    class="text-sm text-slate-500 capitalize"></p>
+
+                <p id="nav-user-kategori"
+                    class="hidden-page text-sm text-indigo-600 mt-1"></p>
+            </div>
+
+            <nav id="nav-menu" class="space-y-2"></nav>
+
+            <button onclick="logout()"
+                class="mt-8 w-full bg-rose-500 text-white p-3 rounded-xl">
+                Logout
+            </button>
+        </aside>
+
+        <!-- CONTENT -->
+        <div class="md:hidden bg-white shadow p-4 flex items-center justify-between">
+
+            <!-- USER INFO -->
+            <div class="flex items-center gap-3">
+
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold">
+                    <span id="nav-user-avatar">U</span>
+                </div>
+
+                <div>
+                    <p class="font-bold" id="nav-user-name-mobile">User</p>
+                    <p class="text-xs text-gray-500" id="nav-user-role-mobile"></p>
+                </div>
+
+            </div>
+
+            <!-- LOGOUT BUTTON -->
+            <button onclick="logout()"
+                class="text-red-500 text-xl p-2 rounded-full hover:bg-red-50 transition">
+                <i class="fa-solid fa-power-off"></i>
+            </button>
+
+        </div>
+        <main class="p-4 md:ml-72 md:p-8">
+
+            <!-- ADMIN DASHBOARD -->
+            <section id="page-admin-dashboard" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Dashboard Admin
+                </h1>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="card-stat">
+                        <h3>Total Peserta</h3>
+                        <p id="stat-total-peserta">0</p>
+                    </div>
+
+                    <div class="card-stat">
+                        <h3>Total Riwayat</h3>
+                        <p id="stat-total-riwayat">0</p>
+                    </div>
+
+                    <div class="card-stat">
+                        <h3>Absen Hari Ini</h3>
+                        <p id="stat-absen-today">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KELOLA USER -->
+            <section id="page-admin-users" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Kelola User
+                </h1>
+
+                <form id="form-add-user"
+                    onsubmit="handleAddUser(event)"
+                    class="bg-white p-6 rounded-xl mb-6 space-y-3">
+
+                    <input id="add-nama"
+                        placeholder="Nama Lengkap"
+                        class="input-field">
+
+                    <input id="add-username"
+                        placeholder="Username"
+                        class="input-field">
+
+                    <input id="add-password"
+                        placeholder="Password"
+                        class="input-field">
+
+                    <input id="add-kategori"
+                        placeholder="Kategori / Kelas"
+                        class="input-field">
+
+                    <select id="add-role" class="input-field">
+                        <option value="siswa">Siswa</option>
+                        <option value="wali">Wali / Pembimbing</option>
+                    </select>
+
+                    <button class="btn-primary">
+                        Tambah User
+                    </button>
+                </form>
+
+                <table class="table-main">
+                    <tbody id="table-users-body"></tbody>
+                </table>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="page-admin-settings" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Pengaturan Lokasi
+                </h1>
+
+                <form onsubmit="handleSaveLocationSettings(event)"
+                    class="space-y-3">
+
+                    <input id="set-lat"
+                        class="input-field"
+                        placeholder="Latitude">
+
+                    <input id="set-lng"
+                        class="input-field"
+                        placeholder="Longitude">
+
+                    <input id="set-radius"
+                        class="input-field"
+                        placeholder="Radius Meter">
+
+                    <button class="btn-primary">
+                        Simpan
+                    </button>
+                </form>
+            </section>
+
+            <!-- WALI DASHBOARD -->
+            <section id="page-wali-dashboard" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Dashboard Wali / Pembimbing
+                </h1>
+
+                <div class="card-stat">
+                    Monitoring siswa & approval izin
+                </div>
+            </section>
+
+            <!-- SISWA DASHBOARD -->
+            <section id="page-user-dashboard" class="hidden-page p-4 space-y-4">
+
+                <!-- HEADER -->
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h2 class="text-lg font-bold" id="ui-user-name">Halo 👋</h2>
+                    <p class="text-sm text-gray-500">Dashboard Kehadiran</p>
+                </div>
+
+                <!-- STATUS HARI INI -->
+                <div class="bg-indigo-600 text-white rounded-2xl p-4 shadow">
+                    <p class="text-sm opacity-80">Status Hari Ini</p>
+                    <h3 class="text-2xl font-bold" id="ui-status-hari">-</h3>
+
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                        <div>Masuk: <b id="ui-masuk">-</b></div>
+                        <div>Pulang: <b id="ui-pulang">-</b></div>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTION -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="navigateTo('page-user-absen')"
+                        class="bg-green-500 text-white p-4 rounded-xl shadow">
+                        Absen
+                    </button>
+
+                    <button onclick="navigateTo('page-history')"
+                        class="bg-gray-800 text-white p-4 rounded-xl shadow">
+                        Riwayat
+                    </button>
+                </div>
+
+                <!-- RINGKASAN BULAN -->
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h3 class="font-bold mb-3">Ringkasan Bulan Ini</h3>
+
+                    <div class="grid grid-cols-3 text-center">
+                        <div>
+                            <p class="text-xl font-bold" id="ui-total-hadir">0</p>
+                            <p class="text-xs text-gray-500">Hadir</p>
+                        </div>
+
+                        <div>
+                            <p class="text-xl font-bold" id="ui-total-masuk">0</p>
+                            <p class="text-xs text-gray-500">Masuk</p>
+                        </div>
+
+                        <div>
+                            <p class="text-xl font-bold" id="ui-total-pulang">0</p>
+                            <p class="text-xs text-gray-500">Pulang</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROGRESS -->
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h3 class="font-bold mb-2">Progress Kehadiran</h3>
+
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div id="ui-progress-kehadiran"
+                            class="bg-green-500 h-3 rounded-full transition-all"></div>
+                    </div>
+
+                    <p class="text-sm mt-2 text-gray-600">
+                        <span id="ui-persentase">0%</span> tercapai
+                    </p>
+                </div>
+
+                <!-- LAST ABSEN -->
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h3 class="font-bold mb-2">Absen Terakhir</h3>
+                    <div id="ui-last-absen" class="text-sm text-gray-600">-</div>
+                </div>
+
+            </section>
+
+            <!-- ABSENSI -->
+            <section id="page-user-absen" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Mulai Absensi
+                </h1>
+
+                <select id="absen-tipe" class="input-field">
+                    <option value="Masuk">Masuk</option>
+                    <option value="Pulang">Pulang</option>
+                </select>
+
+                <video id="kamera-video"
+                    autoplay
+                    class="rounded-xl w-full max-w-md"></video>
+
+                <img id="kamera-preview"
+                    class="hidden-page rounded-xl w-full max-w-md">
+
+                <canvas id="kamera-canvas" class="hidden-page"></canvas>
+
+                <div class="mt-4 flex gap-3">
+                    <button id="btn-snap"
+                        onclick="takeSnapshot()"
+                        class="btn-primary">
+                        Ambil Foto
+                    </button>
+
+                    <button id="btn-retake"
+                        onclick="retakeSnapshot()"
+                        class="hidden-page btn-secondary">
+                        Ulangi
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <p>Status GPS:
+                        <span id="gps-status"></span>
+                    </p>
+
+                    <p>Jarak:
+                        <span id="gps-distance"></span>
+                    </p>
+                </div>
+
+                <button id="btn-submit-absen"
+                    onclick="submitAbsensi()"
+                    class="btn-primary mt-6">
+                    Kirim Absensi
+                </button>
+
+                <p id="submit-warning"
+                    class="text-rose-500 mt-3"></p>
+            </section>
+
+            <!-- HISTORY -->
+            <section id="page-history" class="hidden-page">
+                <h1 class="text-2xl font-bold mb-6">
+                    Riwayat Absensi
+                </h1>
+
+                <table class="table-main">
+                    <tbody id="table-history-body"></tbody>
+                </table>
+            </section>
+
+            <!-- MOBILE USER HEADER -->
+<!-- <div class="p-4 bg-white shadow-md md:hidden">
+    <h2 id="nav-user-name" class="font-bold text-lg"></h2>
+    <p id="nav-user-role" class="text-sm text-gray-500"></p>
+    <p id="nav-user-kategori" class="text-sm text-gray-400"></p>
+</div> -->
+
+<!-- BOTTOM NAV -->
+<div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around p-2">
+
+    <button onclick="navigateTo('page-user-dashboard')" class="text-center text-xs">
+        🏠<br>Home
+    </button>
+
+    <button onclick="navigateTo('page-user-absen')" class="text-center text-xs">
+        📷<br>Absen
+    </button>
+
+    <button onclick="navigateTo('page-history')" class="text-center text-xs">
+        📊<br>Riwayat
+    </button>
+
+</div>
+
+        </main>
+    </div>
+
+    <!-- JS -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/state.js"></script>
+
+    <script src="js/auth.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/absensi.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>
