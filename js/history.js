@@ -46,7 +46,7 @@ function renderHistoryTable(data) {
             <td>${item.nama}</td>
             <td>${item.kategori || '-'}</td>
             <td>${item.tipe}</td>
-            <td>${item.jarak} m</td>
+            <td>${item.jarak ? Number(item.jarak).toFixed(2) : "-"} m </td>
             <td>
                 ${
                     item.fotoUrl && item.fotoUrl !== "Tidak ada foto"
@@ -94,46 +94,3 @@ async function loadAdminDashboardStats() {
         console.error(error);
     }
 }
-
-
-// // ===============================
-// // USER DASHBOARD
-// // ===============================
-
-// async function loadUserDashboardStats() {
-//     try {
-//         const user = AppState.currentUser;
-
-//         const riwayat = await ApiService.call({
-//             action: "get_riwayat",
-//             role: user.role,
-//             username: user.username
-//         });
-
-//         const month = new Date().getMonth();
-//         const thisMonth = riwayat.filter(item => {
-//             const d = new Date(item.timestamp);
-//             return d.getMonth() === month;
-//         });
-
-//         const masuk = thisMonth.filter(
-//             item => item.tipe === "Masuk"
-//         ).length;
-
-//         const pulang = thisMonth.filter(
-//             item => item.tipe === "Pulang"
-//         ).length;
-
-//         document.getElementById("user-stat-bulan").innerText =
-//             thisMonth.length;
-
-//         document.getElementById("user-stat-masuk").innerText =
-//             masuk;
-
-//         document.getElementById("user-stat-pulang").innerText =
-//             pulang;
-
-//     } catch (error) {
-//         console.error("User dashboard error:", error);
-//     }
-// }

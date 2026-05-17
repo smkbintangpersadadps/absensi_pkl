@@ -23,9 +23,15 @@ async function handleLogin(e) {
         return;
     }
 
-    showLoader("Mencoba login...");
-
     try {
+        // ===============================
+        // SHOW LOADER
+        // ===============================
+        showLoading();
+
+        // ===============================
+        // API LOGIN
+        // ===============================
         const user = await ApiService.call({
             action: "login",
             username,
@@ -56,9 +62,7 @@ async function handleLogin(e) {
         // ===============================
         // BUILD UI
         // ===============================
-        if (typeof setupUserInterface === "function") {
-            setupUserInterface();
-        }
+        setupUserInterface?.();
 
         showToast(`Selamat datang, ${user.nama}`);
 
@@ -67,7 +71,7 @@ async function handleLogin(e) {
         showToast(error.message || "Login gagal", true);
 
     } finally {
-        hideLoader();
+        hideLoading();
     }
 }
 
@@ -219,4 +223,18 @@ function setupUserInterface() {
             logout();
             break;
     }
+}
+
+function showLoading() {
+
+  document
+    .getElementById("loadingOverlay")
+    .classList.add("show");
+}
+
+function hideLoading() {
+
+  document
+    .getElementById("loadingOverlay")
+    .classList.remove("show");
 }

@@ -184,69 +184,6 @@ function resetAbsensi() {
     document.getElementById("gps-distance").innerText = "";
 }
 
-
-// ===============================
-// SUBMIT ABSENSI
-// ===============================
-// async function submitAbsensi() {
-//     const user = AppState.currentUser;
-
-//     if (!user) {
-//         showToast("User tidak ditemukan", true);
-//         return;
-//     }
-
-//     if (!capturedPhoto) {
-//         showToast("Ambil foto dulu", true);
-//         return;
-//     }
-
-//     if (!currentLocation) {
-//         showToast("Lokasi belum aktif", true);
-//         return;
-//     }
-
-//     const jarak = calculateDistance(
-//         currentLocation.lat,
-//         currentLocation.lng,
-//         AppState.appSettings.lat,
-//         AppState.appSettings.lng
-//     );
-
-//     if (jarak > AppState.appSettings.radius) {
-//         showToast(
-//             `Anda berada di luar radius absensi (${jarak.toFixed(2)} m)`,
-//             true
-//         );
-//         return;
-//     }
-
-//     try {
-//         showLoader("Mengirim absensi...");
-
-//         await ApiService.call({
-//             action: "submit_absen",
-//             username: user.username,
-//             nama: user.nama,
-//             kategori: user.kategori,
-//             tipe: document.getElementById("absen-tipe").value,
-//             fotoBase64: capturedPhoto,
-//             lat: currentLocation.lat,
-//             lng: currentLocation.lng,
-//             jarak: jarak.toFixed(2)
-//         });
-
-//         showToast("Absensi berhasil");
-
-//         resetAbsensi();
-
-//     } catch (error) {
-//         showToast(error.message, true);
-
-//     } finally {
-//         hideLoader();
-//     }
-// }
 async function submitAbsensi() {
 
     const user = AppState.currentUser;
