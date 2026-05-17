@@ -291,3 +291,23 @@ button:disabled {
     color: #4f46e5;
     font-weight: bold;
 }
+
+.bottom-nav {
+    color: #9ca3af;
+    transform: translateY(0);
+    transition: all 0.2s ease;
+}
+
+.bottom-nav.active {
+    color: #2563eb;
+    transform: translateY(-2px);
+}
+
+.bottom-nav i {
+    transition: all 0.2s ease;
+}
+
+.bottom-nav.active i {
+    transform: scale(1.2);
+    color: #2563eb;
+}
