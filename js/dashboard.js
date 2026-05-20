@@ -113,9 +113,6 @@ const progress =
         setText("ui-status-hari", statusHari);
         setText("ui-masuk", masukToday ? masukToday.timestamp.split(" ")[1] : "-");
         setText("ui-pulang", pulangToday ? pulangToday.timestamp.split(" ")[1] : "-");
-
-        document.getElementById("ui-user-name").innerText =
-            AppState.currentUser.nama;
             
         document.getElementById("ui-total-hadir").innerText = totalHadir;
         document.getElementById("ui-total-masuk").innerText = totalMasuk;
