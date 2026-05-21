@@ -2,13 +2,16 @@ window.AppState = {
     currentUser: null,
     appSettings: null,
 
+    // target lokasi absensi siswa
+    currentUserLocation: null,
+
     // camera
     cameraStream: null,
     currentPhotoBase64: null,
 
-    // gps
-    currentUserLocation: null,
+    // posisi GPS realtime user
+    currentLocation: null,
 
-    // data cache
+    // cache
     riwayat: []
 };

@@ -391,3 +391,12 @@ button:disabled {
         transform: rotate(360deg);
     }
 }
+
+#kamera-video {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+}

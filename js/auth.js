@@ -171,12 +171,12 @@ function setupUserInterface() {
     // SIDEBAR (DESKTOP)
     // ===============================
     setText("nav-user-name", user.nama);
-    setText("nav-user-role", roleLabel);
+    setText("nav-user-role", `Level : ${roleLabel}`);
 
     const kategoriEl = document.getElementById("nav-user-kategori");
     if (kategoriEl) {
         if (user.kategori && user.kategori !== "-") {
-            kategoriEl.innerText = `Kategori: ${user.kategori}`;
+            kategoriEl.innerText = `Kelas : ${user.kategori}`;
             kategoriEl.classList.remove("hidden-page");
         } else {
             kategoriEl.classList.add("hidden-page");

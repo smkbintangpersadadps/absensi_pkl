@@ -60,7 +60,7 @@
 
         <!-- SIDEBAR -->
         <aside id="sidebar"
-    class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg p-6
+             class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg p-6
            hidden md:block">
 
             <div class="mb-8">
@@ -75,11 +75,11 @@
             <nav id="nav-menu" class="space-y-2"></nav>
 
             <div class="mt-8">
-    <button onclick="logout()"
-        class="w-full bg-red-500 text-white p-3 rounded-xl shadow-md active:scale-95 transition">
-        ⏻ Logout
-    </button>
-</div>
+                <button onclick="logout()"
+                    class="w-full bg-red-500 text-white p-3 rounded-xl shadow-md active:scale-95 transition">
+                    ⏻ Logout
+                </button>
+            </div>
         </aside>
 
         <!-- CONTENT -->
@@ -216,8 +216,23 @@
 
                 <!-- HEADER -->
                 <div class="bg-white rounded-2xl p-4 shadow">
-                    <h2 class="text-lg font-bold" id="ui-user-name">Halo 👋</h2>
-                    <p class="text-sm text-gray-500">Dashboard Kehadiran</p>
+                    <h2 class="text-lg font-bold text-slate-800">
+                        Halo, <span id="ui-user-name">Siswa</span> 👋
+                    </h2>
+
+                    <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span id="ui-user-kategori"
+                            class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium">
+                            PKL
+                        </span>
+
+                        <span class="text-gray-400">•</span>
+
+                        <span id="ui-user-lokasi"
+                            class="text-gray-600 truncate max-w-[220px]">
+                            Lokasi PKL
+                        </span>
+                    </div>
                 </div>
 
                 <!-- STATUS HARI INI -->
@@ -299,9 +314,16 @@
                     <option value="Pulang">Pulang</option>
                 </select>
 
+                <!-- <video id="kamera-video"
+                    autoplay
+                    class="rounded-xl w-full max-w-md"></video> -->
                 <video id="kamera-video"
                     autoplay
-                    class="rounded-xl w-full max-w-md"></video>
+                    muted
+                    playsinline
+                    webkit-playsinline
+                    class="rounded-xl w-full max-w-md">
+                </video>
 
                 <img id="kamera-preview"
                     class="hidden-page rounded-xl w-full max-w-md">

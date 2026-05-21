@@ -2,6 +2,10 @@
 // API SERVICE
 // ===============================
 
+// ===============================
+// API SERVICE
+// ===============================
+
 const ApiService = {
 
     async call(payload) {
@@ -11,13 +15,13 @@ const ApiService = {
 
         try {
             const response = await fetch(CONFIG.GAS_URL, {
-                method: 'POST',
+                method: "POST",
                 body: JSON.stringify(payload)
             });
 
             const result = await response.json();
 
-            if (result.status === 'success') {
+            if (result.status === "success") {
                 return result.data;
             }
 
@@ -38,7 +42,10 @@ const ApiService = {
 
                     switch (action) {
 
-                        case 'login':
+                        // ===============================
+                        // LOGIN
+                        // ===============================
+                        case "login":
                             const user = DummyData.users.find(
                                 u =>
                                     u.username === payload.username &&
@@ -46,81 +53,114 @@ const ApiService = {
                             );
 
                             if (!user) {
-                                throw new Error("Username atau password salah");
+                                throw new Error(
+                                    "Username atau password salah"
+                                );
                             }
 
                             resolve({
                                 username: user.username,
                                 role: user.role,
                                 nama: user.nama,
-                                kategori: user.kategori
+                                kategori: user.kategori,
+                                lokasiId: user.lokasiId || "L001"
                             });
                             break;
 
-                        case 'get_settings':
+                        // ===============================
+                        // SETTINGS GLOBAL
+                        // ===============================
+                        case "get_settings":
                             resolve(AppState.appSettings);
                             break;
 
-                        case 'save_settings':
+                        case "save_settings":
                             AppState.appSettings = {
                                 lat: parseFloat(payload.lat),
                                 lng: parseFloat(payload.lng),
                                 radius: parseInt(payload.radius)
                             };
+
                             resolve("Pengaturan tersimpan");
                             break;
 
-                        case 'get_users':
+                        // ===============================
+                        // LOKASI USER PKL
+                        // ===============================
+                        case "get_user_location":
+                            resolve({
+                                lokasiId: payload.lokasiId,
+                                namaIndustri: "Demo Lokasi PKL",
+                                lat: -8.650123,
+                                lng: 115.216789,
+                                radius: 100
+                            });
+                            break;
+
+                        // ===============================
+                        // USERS
+                        // ===============================
+                        case "get_users":
                             resolve(
                                 DummyData.users.filter(
-                                    u => u.role === 'peserta'
+                                    u => u.role === "peserta"
                                 )
                             );
                             break;
 
-                        case 'save_user':
+                        case "save_user":
                             DummyData.users.push({
                                 username: payload.username,
                                 password: payload.password,
-                                role: 'peserta',
+                                role: "peserta",
                                 nama: payload.nama,
-                                kategori: payload.kategori
+                                kategori: payload.kategori,
+                                lokasiId: payload.lokasiId || "L001"
                             });
 
                             resolve("Peserta ditambahkan");
                             break;
 
-                        case 'delete_user':
+                        case "delete_user":
                             DummyData.users =
                                 DummyData.users.filter(
-                                    u => u.username !== payload.username
+                                    u =>
+                                        u.username !== payload.username
                                 );
 
                             resolve("Peserta dihapus");
                             break;
 
-                        case 'get_riwayat':
-                            if (payload.role === 'admin') {
+                        // ===============================
+                        // RIWAYAT
+                        // ===============================
+                        case "get_riwayat":
+                            if (payload.role === "admin") {
                                 resolve(DummyData.riwayat);
                             } else {
                                 resolve(
                                     DummyData.riwayat.filter(
                                         r =>
-                                            r.username === payload.username
+                                            r.username ===
+                                            payload.username
                                     )
                                 );
                             }
                             break;
 
-                        case 'submit_absen':
+                        // ===============================
+                        // SUBMIT ABSENSI
+                        // ===============================
+                        case "submit_absen":
                             const now = new Date();
 
                             const newData = {
                                 id: "ABS-" + Date.now(),
-                                timestamp: now.toLocaleString('id-ID'),
+                                timestamp: now.toLocaleString("id-ID"),
                                 username: payload.username,
                                 nama: payload.nama,
                                 kategori: payload.kategori,
+                                lokasiId: payload.lokasiId,
                                 tipe: payload.tipe,
                                 fotoUrl: "dummy.jpg",
                                 lat: payload.lat,
@@ -130,11 +170,17 @@ const ApiService = {
 
                             DummyData.riwayat.unshift(newData);
 
-                            resolve("Absensi berhasil");
+                            resolve({
+                                status: "success",
+                                message: "Absensi berhasil"
+                            });
+
                             break;
 
                         default:
-                            throw new Error("Action tidak dikenali");
+                            throw new Error(
+                                "Action tidak dikenali"
+                            );
                     }
 
                 } catch (err) {

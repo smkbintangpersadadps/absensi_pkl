@@ -43,13 +43,40 @@ function stopCamera() {
     currentStream = null;
 }
 
+async function loadUserLocation() {
+    try {
+        const user = AppState.currentUser;
 
-// ===============================
-// GPS
-// ===============================
+        if (!user?.lokasiId) {
+            throw new Error("Lokasi PKL belum diatur");
+        }
+
+        const lokasi = await ApiService.call({
+            action: "get_user_location",
+            lokasiId: user.lokasiId
+        });
+
+        AppState.currentUserLocation = lokasi;
+
+        const lokasiEl = document.getElementById("lokasi-industri");
+        if (lokasiEl) {
+            lokasiEl.innerText = lokasi.namaIndustri;
+        }
+
+    } catch (error) {
+        console.error("Load lokasi gagal:", error);
+        showToast(error.message || "Gagal memuat lokasi PKL", true);
+    }
+}
+
 function startGPS() {
     if (!navigator.geolocation) {
         showToast("Browser tidak mendukung GPS", true);
+        return;
+    }
+
+    if (!AppState.currentUserLocation) {
+        showToast("Lokasi PKL belum tersedia", true);
         return;
     }
 
@@ -57,26 +84,27 @@ function startGPS() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            currentLocation = {
+
+            AppState.currentLocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
 
             const distance = calculateDistance(
-                currentLocation.lat,
-                currentLocation.lng,
-                AppState.appSettings.lat,
-                AppState.appSettings.lng
+                AppState.currentLocation.lat,
+                AppState.currentLocation.lng,
+                AppState.currentUserLocation.lat,
+                AppState.currentUserLocation.lng
             );
 
             document.getElementById("gps-status").innerText = "Aktif";
+
             document.getElementById("gps-distance").innerText =
-                `${distance.toFixed(2)} meter`;
+                `${Math.round(distance)} meter`
 
         },
         () => {
             showToast("Gagal mendapatkan lokasi", true);
-
             document.getElementById("gps-status").innerText = "Gagal";
         },
         {
@@ -185,47 +213,36 @@ function resetAbsensi() {
 }
 
 async function submitAbsensi() {
-
     const user = AppState.currentUser;
 
-    // ===============================
-    // VALIDASI USER
-    // ===============================
     if (!user) {
         showToast("User tidak ditemukan", true);
         return;
     }
 
-    // ===============================
-    // VALIDASI FOTO
-    // ===============================
     if (!capturedPhoto) {
         showToast("Ambil foto dulu", true);
         return;
     }
 
-    // ===============================
-    // VALIDASI GPS
-    // ===============================
-    if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
+    if (!AppState.currentLocation) {
         showToast("Lokasi belum aktif", true);
         return;
     }
 
-    // ===============================
-    // HITUNG JARAK
-    // ===============================
+    if (!AppState.currentUserLocation) {
+        showToast("Lokasi PKL belum tersedia", true);
+        return;
+    }
+
     const jarak = calculateDistance(
-        currentLocation.lat,
-        currentLocation.lng,
-        AppState.appSettings.lat,
-        AppState.appSettings.lng
+        AppState.currentLocation.lat,
+        AppState.currentLocation.lng,
+        AppState.currentUserLocation.lat,
+        AppState.currentUserLocation.lng
     );
 
-    // ===============================
-    // VALIDASI RADIUS
-    // ===============================
-    if (jarak > AppState.appSettings.radius) {
+    if (jarak > AppState.currentUserLocation.radius) {
         showToast(
             `Anda berada di luar radius absensi (${jarak.toFixed(2)} m)`,
             true
@@ -233,9 +250,6 @@ async function submitAbsensi() {
         return;
     }
 
-    // ===============================
-    // ANTI DOUBLE SUBMIT (SIMPLE LOCK)
-    // ===============================
     if (window.__isSubmittingAbsensi) return;
     window.__isSubmittingAbsensi = true;
 
@@ -247,10 +261,11 @@ async function submitAbsensi() {
             username: user.username,
             nama: user.nama,
             kategori: user.kategori,
+            lokasiId: user.lokasiId,
             tipe: document.getElementById("absen-tipe").value,
             fotoBase64: capturedPhoto,
-            lat: currentLocation?.lat || 0,
-            lng: currentLocation?.lng || 0,
+            lat: AppState.currentLocation.lat,
+            lng: AppState.currentLocation.lng,
             jarak: jarak
         });
 
@@ -261,21 +276,18 @@ async function submitAbsensi() {
 
         showToast("Absensi berhasil");
 
-        // ===============================
-        // RESET STATE ABSENSI
-        // ===============================
         resetAbsensi();
 
-        // ===============================
-        // STOP CAMERA (IMPORTANT)
-        // ===============================
         stopCamera?.();
-        // 🔥 redirect ke dashboard sesuai role
+
         setTimeout(goToDashboardByRole, 800);
 
     } catch (error) {
         console.error("Submit absensi error:", error);
-        showToast(error.message || "Gagal mengirim absensi", true);
+        showToast(
+            error.message || "Gagal mengirim absensi",
+            true
+        );
 
     } finally {
         hideLoader();
@@ -283,18 +295,12 @@ async function submitAbsensi() {
     }
 }
 
-// ===============================
-// INIT FORM ABSENSI
-// ===============================
-function initAbsenForm() {
+async function initAbsenForm() {
+    await loadUserLocation();
 
-    // start camera ONLY HERE
     startCamera?.();
-
-    // start GPS ONLY HERE
     startGPS?.();
 
-    // cleanup hook (optional but recommended)
     pageCleanup = () => {
         stopCamera?.();
     };
