@@ -4,6 +4,7 @@
 
 window.onload = function () {
     initializeApp();
+    loadRememberedUsername?.();
 };
 
 function initializeApp() {

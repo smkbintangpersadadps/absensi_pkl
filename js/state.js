@@ -4,6 +4,8 @@ window.AppState = {
 
     // target lokasi absensi siswa
     currentUserLocation: null,
+    monitoringMode: "wali",
+    historyMode: "wali",
 
     // camera
     cameraStream: null,

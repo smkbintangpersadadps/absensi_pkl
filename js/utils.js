@@ -1,5 +1,16 @@
+// function showToast(message, isError = false) {
+//   alert(message);
+// }
 function showToast(message, isError = false) {
-  alert(message);
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: isError ? "error" : "success",
+        title: message,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+    });
 }
 
 function showLoader(text = "Loading...") {

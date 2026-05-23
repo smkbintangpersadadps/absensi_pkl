@@ -6,10 +6,13 @@
     <title>Absensi Selfie + Lokasi</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/png" href="https://i.ibb.co.com/sdV75wcH/Logo.png">
+    <link rel="icon" type="image/png" href="Logo.png">
 
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="stylesheet"
+        href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
 
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -30,11 +33,24 @@
     <!-- ================= LOGIN ================= -->
     <section id="page-login"
         class="min-h-screen flex items-center justify-center">
-
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-            <h1 class="text-2xl font-bold text-center mb-6">
-                Login Absensi
-            </h1>
+            <div class="flex flex-col items-center mb-6">
+                <div
+                    class="w-28 h-28 rounded-3xl bg-white shadow-lg
+                    flex items-center justify-center p-4 mb-4">
+                    <img
+                        src="https://i.ibb.co.com/sdV75wcH/Logo.png"
+                        alt="Logo"
+                        class="w-full h-full object-contain">
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800">
+                    Login Absensi
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Sistem Absensi PKL
+                </p>
+            </div>
+                
 
             <form id="login-form" onsubmit="handleLogin(event)">
                 <input id="login-username"
@@ -46,7 +62,36 @@
                     type="password"
                     placeholder="Password"
                     class="w-full border p-3 rounded-xl mb-4">
-
+                
+                <label
+                    class="mt-4 flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 cursor-pointer hover:border-indigo-300 transition">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-700">
+                            Ingat Username
+                        </p>
+                        <p class="text-xs text-slate-500">
+                            Username akan tersimpan di perangkat ini
+                        </p>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox"
+                            id="remember-username"
+                            class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-indigo-600 transition">
+                        </div>
+                        <div
+                            class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5">
+                        </div>
+                    </div>
+                </label>
+                <br>
                 <button
                     class="w-full bg-indigo-600 text-white p-3 rounded-xl">
                     Login
@@ -59,9 +104,9 @@
     <div id="layout-main" class="hidden-page min-h-screen flex flex-col">
 
         <!-- SIDEBAR -->
-        <aside id="sidebar"
-             class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg p-6
-           hidden md:block">
+        <!-- <aside id="sidebar"
+            class="fixed left-0 top-0 h-full w-72 bg-white shadow-lg p-6
+            hidden md:flex flex-col">
 
             <div class="mb-8">
                 <h2 id="nav-user-name" class="font-bold text-lg"></h2>
@@ -74,12 +119,42 @@
 
             <nav id="nav-menu" class="space-y-2"></nav>
 
-            <div class="mt-8">
+            <div class="mt-auto pt-6">
+    <button onclick="logout()"
+        class="w-full bg-red-500 text-white p-3 rounded-xl shadow-md active:scale-95 transition">
+        ⏻ Logout
+    </button>
+</div>
+        </aside> -->
+        <aside id="sidebar"
+            class="fixed left-0 top-0 h-full w-72 bg-white shadow-xl p-5 hidden md:flex flex-col">
+
+            <!-- PROFILE CARD -->
+            <div class="bg-gradient-to-br from-indigo-600 to-blue-500 rounded-3xl p-5 text-white shadow-lg mb-6">
+
+                <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold mb-4">
+                    <span id="nav-user-avatar-desktop">A</span>
+                </div>
+
+                <h2 id="nav-user-name" class="font-bold text-lg leading-tight"></h2>
+
+                <p id="nav-user-role" class="text-sm text-indigo-100 mt-1"></p>
+
+                <p id="nav-user-kategori"
+                    class="text-sm text-white/90 mt-1"></p>
+            </div>
+
+            <!-- MENU -->
+            <nav id="nav-menu" class="space-y-2 flex-1"></nav>
+
+            <!-- LOGOUT -->
+            <div class="pt-6">
                 <button onclick="logout()"
-                    class="w-full bg-red-500 text-white p-3 rounded-xl shadow-md active:scale-95 transition">
+                    class="w-full bg-red-500 hover:bg-red-600 text-white p-3 rounded-2xl shadow-md active:scale-95 transition font-medium">
                     ⏻ Logout
                 </button>
             </div>
+
         </aside>
 
         <!-- CONTENT -->
@@ -201,14 +276,154 @@
             </section>
 
             <!-- WALI DASHBOARD -->
-            <section id="page-wali-dashboard" class="hidden-page">
-                <h1 class="text-2xl font-bold mb-6">
-                    Dashboard Wali / Pembimbing
-                </h1>
-
-                <div class="card-stat">
-                    Monitoring siswa & approval izin
+            <section id="page-wali-dashboard" class="hidden-page p-4 space-y-4">
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h2 class="text-lg font-bold text-slate-800">
+                        Dashboard Wali/Pembimbing
+                    </h2>
+                    <p class="text-sm text-gray-500">
+                        Monitoring absensi siswa bimbingan
+                    </p>
                 </div>
+                <!-- TOGGLE MODE -->
+                <div class="bg-white rounded-2xl p-2 shadow">
+
+                    <div class="grid grid-cols-2 gap-2">
+
+                        <!-- MODE WALI -->
+                        <button
+                            id="btn-mode-wali"
+                            onclick="setMonitoringMode('wali')"
+                            class="p-3 rounded-xl bg-indigo-600 text-white text-sm font-medium transition">
+
+                            Wali Kelas
+
+                        </button>
+
+                        <!-- MODE PEMBIMBING -->
+                        <button
+                            id="btn-mode-pembimbing"
+                            onclick="setMonitoringMode('pembimbing')"
+                            class="p-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium transition">
+
+                            Pembimbing PKL
+
+                        </button>
+
+                    </div>
+
+                </div>
+            <div id="wali-dashboard-content" class="space-y-4">
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white rounded-2xl p-4 shadow text-center">
+                        <p class="text-xs text-gray-500">Total Siswa</p>
+                        <h3 id="wali-total-siswa" class="text-2xl font-bold">0</h3>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 shadow text-center">
+                        <p class="text-xs text-gray-500">Sudah Hadir</p>
+                        <h3 id="wali-sudah-hadir" class="text-2xl font-bold text-green-600">0</h3>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 shadow text-center">
+                        <p class="text-xs text-gray-500">Belum Hadir</p>
+                        <h3 id="wali-belum-hadir" class="text-2xl font-bold text-red-600">0</h3>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- BELUM HADIR -->
+                    <div class="bg-white rounded-2xl p-4 shadow">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-red-600">
+                                Belum Hadir Hari Ini
+                            </h3>
+                            <span id="wali-belum-count"
+                                class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">
+                                0 siswa
+                            </span>
+                        </div>
+                        <div id="wali-belum-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- SUDAH HADIR -->
+                    <div class="bg-white rounded-2xl p-4 shadow">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-green-600">
+                                Sudah Hadir Hari Ini
+                            </h3>
+                            <span id="wali-hadir-count"
+                                class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                0 siswa
+                            </span>
+                        </div>
+                        <div id="wali-hadir-list" class="space-y-2"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="wali-dashboard-empty"
+                class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-700">
+            </div>
+
+            </section>
+            <section id="page-wali-history" class="hidden-page p-4 space-y-4">
+
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h2 class="text-lg font-bold text-slate-800">
+                        Riwayat Absensi Siswa
+                    </h2>
+                    <p class="text-sm text-slate-500">
+                        Data absensi siswa berdasarkan mode Wali Kelas / Pembimbing PKL
+                    </p>
+                </div>
+
+                <!-- TOGGLE MODE RIWAYAT -->
+                <div class="bg-white rounded-2xl p-2 shadow">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            id="btn-history-mode-wali"
+                            onclick="setHistoryMode('wali')"
+                            class="p-3 rounded-xl bg-indigo-600 text-white text-sm font-medium transition">
+                            Wali Kelas
+                        </button>
+
+                        <button
+                            id="btn-history-mode-pembimbing"
+                            onclick="setHistoryMode('pembimbing')"
+                            class="p-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium transition">
+                            Pembimbing PKL
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div id="wali-history-empty"
+                    class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-700">
+                </div>
+
+                <!-- TABLE -->
+                <div id="wali-history-table-wrapper" class="bg-white rounded-2xl p-4 shadow">
+                    <div class="w-full">
+                        <table id="wali-table" class="w-full text-sm display">
+                            <thead>
+                                <tr>
+                                    <th>Waktu</th>
+                                    <th>Nama</th>
+                                    <th>Kelas</th>
+                                    <th>Industri</th>
+                                    <th>Tipe</th>
+                                    <th>Jarak</th>
+                                    <th>Maps</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wali-riwayat-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </section>
 
             <!-- SISWA DASHBOARD -->
@@ -422,6 +637,9 @@
   </div>
 
 </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
     <!-- JS -->
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>

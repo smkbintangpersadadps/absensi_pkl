@@ -1,4 +1,305 @@
 // ===============================
+// WALI DASHBOARD
+// ===============================
+function setMonitoringMode(mode) {
+
+    AppState.monitoringMode = mode;
+
+    const btnWali =
+        document.getElementById("btn-mode-wali");
+
+    const btnPembimbing =
+        document.getElementById("btn-mode-pembimbing");
+
+    // RESET STYLE
+    btnWali?.classList.remove(
+        "bg-indigo-600",
+        "text-white"
+    );
+
+    btnPembimbing?.classList.remove(
+        "bg-indigo-600",
+        "text-white"
+    );
+
+    btnWali?.classList.add(
+        "bg-slate-100",
+        "text-slate-700"
+    );
+
+    btnPembimbing?.classList.add(
+        "bg-slate-100",
+        "text-slate-700"
+    );
+
+    // ACTIVE STYLE
+    if (mode === "wali") {
+
+        btnWali?.classList.remove(
+            "bg-slate-100",
+            "text-slate-700"
+        );
+
+        btnWali?.classList.add(
+            "bg-indigo-600",
+            "text-white"
+        );
+
+    } else {
+
+        btnPembimbing?.classList.remove(
+            "bg-slate-100",
+            "text-slate-700"
+        );
+
+        btnPembimbing?.classList.add(
+            "bg-indigo-600",
+            "text-white"
+        );
+    }
+
+    // RELOAD DASHBOARD
+    loadWaliDashboard?.(true);
+}
+
+async function loadWaliDashboard(useLoader = false) {
+
+    try {
+
+        const user = AppState.currentUser;
+
+        if (!user) return;
+
+        if (useLoader) {
+            showLoader("Memuat data siswa...");
+        }
+
+        if (!AppState.monitoringMode) {
+            AppState.monitoringMode = "wali";
+        }
+
+        const data = await ApiService.call({
+            action: "get_monitoring_dashboard",
+            mode: AppState.monitoringMode,
+            username: user.username,
+            kategori: user.kategori
+        });
+
+        const siswa = data.siswa || [];
+        const riwayat = data.riwayat || [];
+        const contentBox = document.getElementById("wali-dashboard-content");
+        const emptyBox = document.getElementById("wali-dashboard-empty");
+
+            if (contentBox) contentBox.classList.remove("hidden");
+            if (emptyBox) {
+                emptyBox.classList.add("hidden");
+                emptyBox.innerHTML = "";
+            }
+
+        if (AppState.monitoringMode === "wali" && siswa.length === 0) {
+            if (contentBox) contentBox.classList.add("hidden");
+
+            if (emptyBox) {
+                emptyBox.classList.remove("hidden");
+                emptyBox.innerHTML = `
+                    <p>
+                        Tidak memiliki siswa yang sedang PKL sebagai <b>Wali Kelas</b>.
+                    </p>
+
+                    <button onclick="setMonitoringMode('pembimbing')"
+                        class="mt-3 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm">
+                        Buka Pembimbing PKL
+                    </button>
+                `;
+            }
+
+            return;
+        }
+
+        if (AppState.monitoringMode === "pembimbing" && siswa.length === 0) {
+            if (contentBox) contentBox.classList.add("hidden");
+
+            if (emptyBox) {
+                emptyBox.classList.remove("hidden");
+                emptyBox.innerHTML = `
+                    <p>
+                        Anda tidak sedang menjadi <b>Pembimbing PKL</b>.
+                    </p>
+
+                    <button onclick="setMonitoringMode('wali')"
+                        class="mt-3 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm">
+                        Buka Wali Kelas
+                    </button>
+                `;
+            }
+
+            return;
+        }
+
+        const today = new Date();
+
+        const todayStr =
+            today.getDate().toString().padStart(2, "0") + "/" +
+            (today.getMonth() + 1).toString().padStart(2, "0") + "/" +
+            today.getFullYear();
+
+        // ===============================
+        // SISWA SUDAH HADIR
+        // ===============================
+        const hadirHariIni = riwayat.filter(r =>
+            r.timestamp?.startsWith(todayStr) &&
+            r.tipe === "Masuk"
+        );
+
+        const hadirUsernames = new Set(
+            hadirHariIni.map(r => r.username)
+        );
+
+        // ===============================
+        // SISWA BELUM HADIR
+        // ===============================
+        const belumHadir = siswa.filter(s =>
+            !hadirUsernames.has(s.username)
+        );
+
+        // ===============================
+        // SUMMARY
+        // ===============================
+        document.getElementById(
+            "wali-total-siswa"
+        ).innerText = siswa.length;
+
+        document.getElementById(
+            "wali-sudah-hadir"
+        ).innerText = hadirHariIni.length;
+
+        document.getElementById(
+            "wali-belum-hadir"
+        ).innerText = belumHadir.length;
+
+        // ===============================
+        // COUNTER BADGE
+        // ===============================
+        document.getElementById(
+            "wali-belum-count"
+        ).innerText = `${belumHadir.length} siswa`;
+
+        document.getElementById(
+            "wali-hadir-count"
+        ).innerText = `${hadirHariIni.length} siswa`;
+
+        // ===============================
+        // BELUM HADIR LIST
+        // ===============================
+        const belumList =
+            document.getElementById(
+                "wali-belum-list"
+            );
+
+        if (belumList) {
+
+            if (!belumHadir.length) {
+
+                belumList.innerHTML = `
+                    <div class="text-sm text-green-600">
+                        Semua siswa sudah hadir
+                    </div>
+                `;
+
+            } else {
+
+                belumList.innerHTML =
+                    belumHadir.map(s => `
+
+                        <div class="border rounded-xl p-3">
+
+                            <div class="font-medium text-slate-800">
+                                ${s.nama}
+                            </div>
+
+                            <div class="text-xs text-slate-500 mt-1">
+                                ${s.kategori}
+                            </div>
+
+                        </div>
+
+                    `).join("");
+            }
+        }
+
+        // ===============================
+        // SUDAH HADIR LIST
+        // ===============================
+        const hadirList =
+            document.getElementById(
+                "wali-hadir-list"
+            );
+
+        if (hadirList) {
+
+            if (!hadirHariIni.length) {
+
+                hadirList.innerHTML = `
+                    <div class="text-sm text-slate-500">
+                        Belum ada siswa hadir
+                    </div>
+                `;
+
+            } else {
+
+                hadirList.innerHTML =
+                    hadirHariIni.map(r => `
+
+                        <div class="border rounded-xl p-3">
+
+                            <div class="flex items-center justify-between">
+
+                                <div>
+
+                                    <div class="font-medium text-slate-800">
+                                        ${r.nama}
+                                    </div>
+
+                                    <div class="text-xs text-slate-500 mt-1">
+                                        ${r.kategori}
+                                    </div>
+
+                                </div>
+
+                                <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                    Hadir
+                                </span>
+
+                            </div>
+
+                            <div class="mt-2 text-xs text-slate-500">
+                                ${r.timestamp}
+                            </div>
+
+                        </div>
+
+                    `).join("");
+            }
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Wali dashboard error:",
+            error
+        );
+
+        showToast(
+            "Gagal memuat dashboard wali",
+            true
+        );
+    } finally {
+        hideLoader();
+    }
+
+}
+
+// ===============================
 // USER DASHBOARD
 // ===============================
 
@@ -16,6 +317,7 @@ async function loadUserDashboardStats() {
             role: user.role,
             username: user.username
         });
+        
 
         // ===============================
         // REQUIRED UI CHECK
@@ -64,6 +366,7 @@ async function loadUserDashboardStats() {
             console.warn("Riwayat bukan array:", riwayat);
             return;
         }
+        
 
         // ===============================
         // FORMAT TODAY

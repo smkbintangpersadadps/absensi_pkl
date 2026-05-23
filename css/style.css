@@ -400,3 +400,20 @@ button:disabled {
     border-radius: 16px;
     display: block;
 }
+
+.dataTables_wrapper {
+    width: 100%;
+}
+
+.dataTables_scroll {
+    width: 100%;
+}
+
+.dataTables_scrollHeadInner,
+.dataTables_scrollHeadInner table {
+    width: 100% !important;
+}
+
+#wali-table {
+    width: 100% !important;
+}

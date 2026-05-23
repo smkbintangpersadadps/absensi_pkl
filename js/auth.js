@@ -62,9 +62,31 @@ async function handleLogin(e) {
         // ===============================
         // BUILD UI
         // ===============================
-        setupUserInterface?.();
+        const remember =
+        document.getElementById("remember-username")?.checked;
+        if (remember) {
+            localStorage.setItem(
+                "remember_username",
+                username
+            );
+        } else {
+            localStorage.removeItem(
+                "remember_username"
+            );
+        }
 
-        showToast(`Selamat datang, ${user.nama}`);
+        Swal.fire({
+            icon: "success",
+            title: "Login Berhasil",
+            text: `Selamat datang, ${user.nama}`,
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true    // opsional: bar timer
+        }).then(() => {
+            setupUserInterface?.();
+        });
+
+        
 
     } catch (error) {
         console.error("Login error:", error);
@@ -78,24 +100,78 @@ async function handleLogin(e) {
 // ===============================
 // LOGOUT
 // ===============================
+// function logout() {
+
+//     AppState.currentUser = null;
+
+//     localStorage.removeItem("absen_user");
+//     localStorage.removeItem("absen_settings");
+
+//     // STOP CAMERA WAJIB
+//     if (typeof stopCamera === "function") {
+//         stopCamera();
+//     }
+
+//     // optional reset UI
+//     document.getElementById("login-form")?.reset();
+
+//     navigateTo("page-login");
+
+//     showToast("Berhasil logout");
+// }
+
 function logout() {
+    Swal.fire({
+        title: "Keluar dari aplikasi?",
+        text: "Sesi login Anda akan diakhiri.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Logout",
+        cancelButtonText: "Batal",
+        confirmButtonColor: "#ef4444"
+    }).then((result) => {
+        if (result.isConfirmed) {
 
-    AppState.currentUser = null;
+            AppState.currentUser = null;
+            AppState.currentUserLocation = null;
+            AppState.currentLocation = null;
 
-    localStorage.removeItem("absen_user");
-    localStorage.removeItem("absen_settings");
+            localStorage.removeItem("absen_user");
+            localStorage.removeItem("absen_settings");
 
-    // STOP CAMERA WAJIB
-    if (typeof stopCamera === "function") {
-        stopCamera();
+            if (typeof stopCamera === "function") {
+                stopCamera();
+            }
+
+            document.getElementById("login-form")?.reset();
+
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil Logout",
+                timer: 2000,
+                showConfirmButton: false,
+                timerProgressBar: true    // opsional: bar timer
+            }).then(() => {
+                navigateTo("page-login");
+                loadRememberedUsername?.();
+            });
+        }
+    });
+}
+
+// ===============================
+// REMEMBER USERNAME
+// ===============================
+function loadRememberedUsername() {
+    const savedUsername = localStorage.getItem("remember_username");
+
+    if (savedUsername) {
+        const usernameInput = document.getElementById("login-username");
+        const rememberCheck = document.getElementById("remember-username");
+
+        if (usernameInput) usernameInput.value = savedUsername;
+        if (rememberCheck) rememberCheck.checked = true;
     }
-
-    // optional reset UI
-    document.getElementById("login-form")?.reset();
-
-    navigateTo("page-login");
-
-    showToast("Berhasil logout");
 }
 
 // ===============================
@@ -171,6 +247,10 @@ function setupUserInterface() {
     // SIDEBAR (DESKTOP)
     // ===============================
     setText("nav-user-name", user.nama);
+    const avatarDesktop = document.getElementById("nav-user-avatar-desktop");
+        if (avatarDesktop) {
+            avatarDesktop.innerText = user.nama?.charAt(0)?.toUpperCase() || "U";
+        }
     setText("nav-user-role", `Level : ${roleLabel}`);
 
     const kategoriEl = document.getElementById("nav-user-kategori");
@@ -211,6 +291,7 @@ function setupUserInterface() {
             break;
 
         case "wali":
+            showLoader("Memuat data siswa...");
             navigateTo("page-wali-dashboard");
             break;
 
@@ -237,4 +318,25 @@ function hideLoading() {
   document
     .getElementById("loadingOverlay")
     .classList.remove("show");
+}
+
+function showLoader(text = "Memeriksa data...") {
+    const overlay = document.getElementById("loadingOverlay");
+    const textEl = document.querySelector("#loadingOverlay .loading-text");
+
+    if (textEl) {
+        textEl.innerText = text;
+    }
+
+    if (overlay) {
+        overlay.classList.add("show");
+    }
+}
+
+function hideLoader() {
+    const overlay = document.getElementById("loadingOverlay");
+
+    if (overlay) {
+        overlay.classList.remove("show");
+    }
 }

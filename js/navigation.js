@@ -74,6 +74,14 @@ function runPageLoader(pageId) {
             populateLocationSettingsForm?.();
             break;
 
+        case "page-wali-dashboard":
+            setMonitoringMode?.(AppState.monitoringMode || "wali");
+            break;
+
+        case "page-wali-history":
+            setHistoryMode?.(AppState.historyMode || "wali");
+            break;
+                
         case "page-user-dashboard":
             loadUserDashboardStats?.();
             break;
@@ -109,10 +117,17 @@ function buildMenu(user) {
 
     else if (role === "wali") {
         menu.innerHTML = `
-            <a href="#" onclick="navigateTo('page-wali-dashboard')">Dashboard</a>
-            <a href="#" onclick="navigateTo('page-wali-monitoring')">Monitoring Siswa</a>
-            <a href="#" onclick="navigateTo('page-wali-approval')">Approval Izin</a>
-            <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
+            <a href="#" onclick="navigateTo('page-wali-dashboard')"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+            <i class="fa-solid fa-chart-line w-5"></i>
+            <span>Dashboard Monitoring</span>
+        </a>
+
+        <a href="#" onclick="navigateTo('page-wali-history')"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+            <i class="fa-solid fa-clock-rotate-left w-5"></i>
+            <span>Riwayat</span>
+        </a>
         `;
     }
 
