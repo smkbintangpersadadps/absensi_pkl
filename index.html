@@ -32,71 +32,115 @@
 
     <!-- ================= LOGIN ================= -->
     <section id="page-login"
-        class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-            <div class="flex flex-col items-center mb-6">
-                <div
-                    class="w-28 h-28 rounded-3xl bg-white shadow-lg
-                    flex items-center justify-center p-4 mb-4">
+        class="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-100 via-white to-blue-100 flex items-center justify-center px-4">
+        <!-- BACKGROUND GLOW -->
+        <div class="absolute -top-24 -left-24 w-72 h-72 bg-indigo-400/30 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-blue-400/30 rounded-full blur-3xl"></div>
+        <!-- LOGIN CARD -->
+        <div class="relative w-full max-w-md bg-white/85 backdrop-blur-xl border border-white/60 rounded-[34px] shadow-2xl p-7 md:p-8">
+            <!-- TOP ACCENT -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-b-full"></div>
+            <!-- HEADER -->
+            <div class="flex flex-col items-center mb-7 pt-2">
+                <div class="w-28 h-28 rounded-[28px] bg-gradient-to-br from-white to-indigo-50 shadow-xl border border-indigo-100 flex items-center justify-center p-4 mb-4">
                     <img
                         src="https://i.ibb.co.com/sdV75wcH/Logo.png"
                         alt="Logo"
                         class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800">
-                    Login Absensi
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 text-center leading-snug">
+                    SMK Bintang Persada Denpasar
                 </h1>
                 <p class="text-sm text-slate-500 mt-1">
                     Sistem Absensi PKL
                 </p>
+                <div class="mt-3 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-medium">
+                    Selfie + Lokasi Realtime
+                </div>
             </div>
-                
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- USERNAME -->
+                <div>
+                    <label class="text-sm font-medium text-slate-600 mb-1 block">
+                        Username
+                    </label>
+                    <div class="relative">
+                        <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
 
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <input id="login-username"
-                    type="text"
-                    placeholder="Username"
-                    class="w-full border p-3 rounded-xl mb-4">
-
-                <input id="login-password"
-                    type="password"
-                    placeholder="Password"
-                    class="w-full border p-3 rounded-xl mb-4">
-                
-                <label
-                    class="mt-4 flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 cursor-pointer hover:border-indigo-300 transition">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
-                            <i class="fa-regular fa-user"></i>
-                        </div>
+                        <input id="login-username"
+                            type="text"
+                            placeholder="Masukkan username"
+                            class="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50
+                            focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500
+                            transition">
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-700">
-                            Ingat Username
-                        </p>
-                        <p class="text-xs text-slate-500">
-                            Username akan tersimpan di perangkat ini
-                        </p>
+                </div>
+                <!-- PASSWORD -->
+                <div>
+                    <label class="text-sm font-medium text-slate-600 mb-1 block">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input
+                            type="password"
+                            id="login-password"
+                            placeholder="Masukkan password"
+                            class="w-full h-12 pl-11 pr-12 rounded-2xl border border-slate-200 bg-slate-50
+                            focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500
+                            transition">
+                        <button
+                            type="button"
+                            onclick="togglePassword()"
+                            class="absolute right-0 top-0 h-full flex items-center px-4 text-slate-400 hover:text-indigo-600 transition">
+                            <i id="toggle-password-icon"
+                                class="fa-regular fa-eye leading-none"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- REMEMBER USERNAME -->
+                <label
+                    class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 cursor-pointer hover:border-indigo-300 hover:bg-white transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <i class="fa-regular fa-id-card"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">
+                                Ingat Username
+                            </p>
+                            <p class="text-xs text-slate-500">
+                                Tersimpan di perangkat ini
+                            </p>
+                        </div>
                     </div>
                     <div class="relative">
                         <input type="checkbox"
                             id="remember-username"
                             class="sr-only peer">
-                        <div
-                            class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-indigo-600 transition">
-                        </div>
-                        <div
-                            class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition peer-checked:translate-x-5">
-                        </div>
+                        <div class="w-11 h-6 bg-slate-300 rounded-full peer-checked:bg-indigo-600 transition"></div>
+                        <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transition peer-checked:translate-x-5"></div>
                     </div>
                 </label>
-                <br>
+                <!-- LOGIN BUTTON -->
                 <button
-                    class="w-full bg-indigo-600 text-white p-3 rounded-xl">
-                    Login
+                    class="w-full h-12 rounded-2xl
+                    bg-gradient-to-r from-indigo-600 to-blue-500
+                    text-white font-semibold
+                    shadow-lg shadow-indigo-200
+                    hover:scale-[1.02]
+                    hover:shadow-xl hover:shadow-indigo-300
+                    active:scale-95
+                    transition-all duration-200
+                    flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Login</span>
                 </button>
             </form>
+            <!-- FOOTER -->
+            <p class="text-center text-xs text-slate-400 mt-6">
+                © Absensi PKL SMK Bintang Persada
+            </p>
         </div>
     </section>
 
@@ -443,10 +487,12 @@
 
                         <span class="text-gray-400">•</span>
 
-                        <span id="ui-user-lokasi"
-                            class="text-gray-600 truncate max-w-[220px]">
+                        <a id="ui-user-lokasi"
+                            href="#"
+                            target="_blank"
+                            class="text-indigo-600 hover:underline">
                             Lokasi PKL
-                        </span>
+                        </a>
                     </div>
                 </div>
 
@@ -591,22 +637,8 @@
             </section>
 
         <!-- BOTTOM NAV -->
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex justify-around py-2 md:hidden">
-        
-            <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span>Home</span>
-            </button>
-        
-            <button onclick="navigateTo('page-user-absen')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                <i class="fa-solid fa-camera text-lg"></i>
-                <span>Absen</span>
-            </button>
-        
-            <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                <span>Riwayat</span>
-            </button>    
+        <div id="mobile-bottom-menu"
+            class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex justify-around py-2 md:hidden z-50">
         </div>
         </main>
         <footer class="mt-auto border-t bg-white text-center text-xs md:ml-64">

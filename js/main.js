@@ -49,3 +49,57 @@ function restoreSession() {
         navigateTo("page-login");
     }
 }
+
+// ===============================
+// SESSION TIMEOUT
+// ===============================
+let sessionTimer = null;
+const SESSION_TIMEOUT = 5 * 60 * 1000; // 5 menit
+
+function startSessionTimer() {
+    clearTimeout(sessionTimer);
+
+    if (!AppState.currentUser) return;
+
+    sessionTimer = setTimeout(() => {
+        autoLogoutByTimeout();
+    }, SESSION_TIMEOUT);
+}
+
+function resetSessionTimer() {
+    if (!AppState.currentUser) return;
+    startSessionTimer();
+}
+
+function stopSessionTimer() {
+    clearTimeout(sessionTimer);
+    sessionTimer = null;
+}
+
+function autoLogoutByTimeout() {
+    AppState.currentUser = null;
+    AppState.currentUserLocation = null;
+    AppState.currentLocation = null;
+
+    localStorage.removeItem("absen_user");
+    localStorage.removeItem("absen_settings");
+
+    if (typeof stopCamera === "function") {
+        stopCamera();
+    }
+
+    Swal.fire({
+        icon: "warning",
+        title: "Sesi Berakhir",
+        text: "Anda logout otomatis karena tidak ada aktivitas selama 5 menit.",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#4f46e5"
+    }).then(() => {
+        navigateTo("page-login");
+        loadRememberedUsername?.();
+    });
+}
+
+["click", "mousemove", "keydown", "touchstart", "scroll"].forEach(eventName => {
+    document.addEventListener(eventName, resetSessionTimer, true);
+});

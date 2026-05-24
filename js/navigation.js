@@ -88,6 +88,14 @@ function runPageLoader(pageId) {
 
         case "page-user-absen":
             // ONLY THIS ONE CONTROL CAMERA + GPS
+            // initAbsenForm?.();
+            // break;
+            if (AppState.accessMode === "ortu") {
+                showToast("Orang tua tidak memiliki akses absensi", true);
+                navigateTo("page-user-dashboard");
+                return;
+            }
+
             initAbsenForm?.();
             break;
 
@@ -132,12 +140,18 @@ function buildMenu(user) {
     }
 
     else {
-        // siswa
-        menu.innerHTML = `
-            <a href="#" onclick="navigateTo('page-user-dashboard')">Dashboard</a>
-            <a href="#" onclick="navigateTo('page-user-absen')">Absen</a>
-            <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
-        `;
+        if (AppState.accessMode === "ortu") {
+            menu.innerHTML = `
+                <a href="#" onclick="navigateTo('page-user-dashboard')">Dashboard</a>
+                <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
+            `;
+        } else {
+            menu.innerHTML = `
+                <a href="#" onclick="navigateTo('page-user-dashboard')">Dashboard</a>
+                <a href="#" onclick="navigateTo('page-user-absen')">Absen</a>
+                <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
+            `;
+        }
     }
 }
 
@@ -157,4 +171,100 @@ function setActiveNav(pageId) {
             btn.classList.remove("active");
         }
     });
+}
+
+function buildMobileBottomMenu(user) {
+
+    const menu = document.getElementById("mobile-bottom-menu");
+
+    if (!menu || !user) return;
+
+    const role = user.role;
+
+    // ===============================
+    // ADMIN
+    // ===============================
+    if (role === "admin") {
+
+        menu.innerHTML = `
+            <button onclick="navigateTo('page-admin-dashboard')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span>Dashboard</span>
+            </button>
+
+            <button onclick="navigateTo('page-admin-users')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-users text-lg"></i>
+                <span>User</span>
+            </button>
+
+            <button onclick="navigateTo('page-history')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <span>Riwayat</span>
+            </button>
+        `;
+    }
+
+    // ===============================
+    // WALI / PEMBIMBING
+    // ===============================
+    else if (role === "wali") {
+
+        menu.innerHTML = `
+            <button onclick="navigateTo('page-wali-dashboard')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span>Monitoring</span>
+            </button>
+
+            <button onclick="navigateTo('page-wali-history')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <span>Riwayat</span>
+            </button>
+        `;
+    }
+
+    // ===============================
+    // SISWA
+    // ===============================
+    else {
+        if (AppState.accessMode === "ortu") {
+            menu.innerHTML = `
+                <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span>Home</span>
+                </button>
+
+                <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                    <span>Riwayat</span>
+                </button>
+            `;
+        } else {
+            menu.innerHTML = `
+                <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span>Home</span>
+                </button>
+
+                <button onclick="navigateTo('page-user-absen')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-camera text-lg"></i>
+                    <span>Absen</span>
+                </button>
+
+                <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                    <span>Riwayat</span>
+                </button>
+            `;
+        }
+    }
 }

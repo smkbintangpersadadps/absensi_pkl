@@ -217,12 +217,17 @@ async function loadWaliDashboard(useLoader = false) {
                                 ${s.nama}
                             </div>
 
-                            <div class="text-xs text-slate-500 mt-1">
-                                ${s.kategori}
+                            <div class="text-xs text-slate-500 mt-1 flex items-center gap-1 flex-wrap">
+                                <span>${s.kategori}</span>
+                                <span>•</span>
+                                <a href="${s.mapsUrl || '#'}"
+                                    target="_blank"
+                                    class="text-indigo-600 hover:underline">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    ${s.namaIndustri || "Belum diatur"}
+                                </a>
                             </div>
-
                         </div>
-
                     `).join("");
             }
         }
@@ -298,7 +303,36 @@ async function loadWaliDashboard(useLoader = false) {
     }
 
 }
+// ===============================
+// MODE SISWA
+// ===============================
+function pilihModeSiswaOrtu() {
+        Swal.fire({
+        title: "Pilih Akses",
+        text: "Masuk sebagai siswa atau orang tua?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Siswa",
+        cancelButtonText: "Orang Tua",
+        confirmButtonColor: "#4f46e5",
+        cancelButtonColor: "#16a34a",
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            AppState.accessMode = "siswa";
+        } else {
+            AppState.accessMode = "ortu";
+        }
 
+        buildMenu(AppState.currentUser);
+        buildMobileBottomMenu?.(AppState.currentUser);
+
+        showLoader("Memuat dashboard...");
+
+        navigateTo("page-user-dashboard");
+    });
+}
 // ===============================
 // USER DASHBOARD
 // ===============================
@@ -458,7 +492,23 @@ async function loadUserDashboardStats() {
 
         setWidth("ui-progress-kehadiran", `${progress}%`);
         setText("ui-persentase", `${Math.round(progress)}%`);
-        setText("ui-user-lokasi", AppState.currentUserLocation?.namaIndustri || "Belum diatur");
+        // setText("ui-user-lokasi", AppState.currentUserLocation?.namaIndustri || "Belum diatur");
+        const lokasiEl = document.getElementById("ui-user-lokasi");
+
+            if (lokasiEl && AppState.currentUserLocation) {
+                const lokasi = AppState.currentUserLocation;
+
+                lokasiEl.innerHTML = `
+                    <i class="fa-solid fa-location-dot"></i>
+                    ${lokasi.namaIndustri || "Lokasi PKL"}
+                `;
+
+                lokasiEl.href = `https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`;
+                lokasiEl.target = "_blank";
+            } else if (lokasiEl) {
+                lokasiEl.innerText = "Belum diatur";
+                lokasiEl.removeAttribute("href");
+            }
                 
         if (last) {
             setHTML("ui-last-absen", `
@@ -477,6 +527,8 @@ async function loadUserDashboardStats() {
     } catch (error) {
         console.error("Dashboard error:", error);
         showToast("Gagal load dashboard", true);
+    } finally {
+        hideLoader();
     }
 }
 

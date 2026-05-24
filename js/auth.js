@@ -83,6 +83,7 @@ async function handleLogin(e) {
             showConfirmButton: false,
             timerProgressBar: true    // opsional: bar timer
         }).then(() => {
+            startSessionTimer();
             setupUserInterface?.();
         });
 
@@ -132,6 +133,9 @@ function logout() {
     }).then((result) => {
         if (result.isConfirmed) {
 
+            // STOP SESSION TIMER
+            stopSessionTimer?.();
+            
             AppState.currentUser = null;
             AppState.currentUserLocation = null;
             AppState.currentLocation = null;
@@ -280,6 +284,7 @@ function setupUserInterface() {
     if (typeof buildMenu === "function") {
         buildMenu(user);
     }
+    buildMobileBottomMenu?.(user);
 
     // ===============================
     // ROUTING BY ROLE
@@ -296,7 +301,7 @@ function setupUserInterface() {
             break;
 
         case "siswa":
-            navigateTo("page-user-dashboard");
+            pilihModeSiswaOrtu();
             break;
 
         default:
@@ -338,5 +343,28 @@ function hideLoader() {
 
     if (overlay) {
         overlay.classList.remove("show");
+    }
+}
+
+function togglePassword() {
+
+    const input = document.getElementById("login-password");
+    const icon = document.getElementById("toggle-password-icon");
+
+    if (!input || !icon) return;
+
+    if (input.type === "password") {
+
+        input.type = "text";
+
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+
+    } else {
+
+        input.type = "password";
+
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
     }
 }

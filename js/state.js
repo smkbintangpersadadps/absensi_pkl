@@ -6,6 +6,7 @@ window.AppState = {
     currentUserLocation: null,
     monitoringMode: "wali",
     historyMode: "wali",
+    accessMode: "siswa",
 
     // camera
     cameraStream: null,
