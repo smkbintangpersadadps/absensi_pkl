@@ -103,3 +103,68 @@ function autoLogoutByTimeout() {
 ["click", "mousemove", "keydown", "touchstart", "scroll"].forEach(eventName => {
     document.addEventListener(eventName, resetSessionTimer, true);
 });
+
+function resetAppCache() {
+
+    Swal.fire({
+        title: "Reset Cache?",
+        text: "Data sementara aplikasi akan dibersihkan.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Reset",
+        cancelButtonText: "Batal",
+        confirmButtonColor: "#f59e0b"
+    }).then((result) => {
+
+        if (!result.isConfirmed) return;
+
+        try {
+
+            // STOP CAMERA
+            stopCamera?.();
+
+            // CLEAR TEMP STATE
+            capturedPhoto = null;
+
+            currentLocation = null;
+
+            AppState.currentUserLocation = null;
+
+            // OPTIONAL STORAGE
+            localStorage.removeItem("absen_settings");
+
+            // RESET GPS UI
+            document.getElementById("gps-status").innerText = "-";
+            document.getElementById("gps-distance").innerText = "-";
+
+            // RESET PREVIEW
+            const preview = document.getElementById("foto-preview");
+
+            if (preview) {
+                preview.src = "";
+                preview.classList.add("hidden");
+            }
+
+            Swal.fire({
+                icon: "success",
+                title: "Cache berhasil dibersihkan",
+                text: "Aplikasi akan dimuat ulang",
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+
+                location.reload();
+
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            Swal.fire({
+                icon: "error",
+                title: "Gagal reset cache"
+            });
+        }
+    });
+}

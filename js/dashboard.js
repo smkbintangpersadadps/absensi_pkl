@@ -509,7 +509,25 @@ async function loadUserDashboardStats() {
                 lokasiEl.innerText = "Belum diatur";
                 lokasiEl.removeAttribute("href");
             }
-                
+            
+        setText(
+    "ui-user-pembina",
+    AppState.currentUserLocation?.pembimbing || "-"
+);
+
+const waEl = document.getElementById("ui-user-wa-pembina");
+
+if (waEl && AppState.currentUserLocation?.waPembimbing) {
+    let wa = String(AppState.currentUserLocation.waPembimbing).replace(/\D/g, "");
+
+    if (wa.startsWith("08")) {
+        wa = "62" + wa.substring(1);
+    }
+
+    waEl.href = `https://wa.me/${wa}`;
+    waEl.classList.remove("hidden");
+}
+
         if (last) {
             setHTML("ui-last-absen", `
                 <p><b>${last.tipe}</b> - ${last.timestamp}</p>
