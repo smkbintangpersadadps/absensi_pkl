@@ -154,6 +154,31 @@ async function loadWaliDashboard(useLoader = false) {
         const hadirUsernames = new Set(
             hadirHariIni.map(r => r.username)
         );
+        document.getElementById("wali-nama").textContent =
+            user.namaLengkap ||
+            user.nama ||
+            user["Nama Lengkap"] ||
+            "-";
+
+        // document.getElementById("wali-role").textContent =
+        //     user.role ||
+        //     user.Role ||
+        //     user["Role"] ||
+        //     "-";
+
+        document.getElementById("wali-kategori").textContent =
+            user.kategori ||
+            user.Kategori ||
+            user["Kategori"] ||
+            "-";
+
+        document.getElementById("wali-avatar").textContent =
+            (
+                user.namaLengkap ||
+                user.nama ||
+                user["Nama Lengkap"] ||
+                "W"
+            ).charAt(0).toUpperCase();
 
         // ===============================
         // SISWA BELUM HADIR
@@ -511,22 +536,24 @@ async function loadUserDashboardStats() {
             }
             
         setText(
-    "ui-user-pembina",
-    AppState.currentUserLocation?.pembimbing || "-"
-);
+            "ui-user-pembina",
+            user.pembimbingNama || "-"
+        );
 
-const waEl = document.getElementById("ui-user-wa-pembina");
+        const waEl = document.getElementById("ui-user-wa-pembina");
 
-if (waEl && AppState.currentUserLocation?.waPembimbing) {
-    let wa = String(AppState.currentUserLocation.waPembimbing).replace(/\D/g, "");
+        if (waEl && user.pembimbingWa) {
+            let wa = String(user.pembimbingWa).replace(/\D/g, "");
 
-    if (wa.startsWith("08")) {
-        wa = "62" + wa.substring(1);
-    }
+            if (wa.startsWith("08")) {
+                wa = "62" + wa.substring(1);
+            }
 
-    waEl.href = `https://wa.me/${wa}`;
-    waEl.classList.remove("hidden");
-}
+            waEl.href = `https://wa.me/${wa}`;
+            waEl.classList.remove("hidden");
+        } else if (waEl) {
+            waEl.classList.add("hidden");
+        }
 
         if (last) {
             setHTML("ui-last-absen", `

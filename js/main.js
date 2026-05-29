@@ -168,3 +168,28 @@ function resetAppCache() {
         }
     });
 }
+
+function updateTopbarClock() {
+    const now = new Date();
+
+    const timeEl = document.getElementById("topbar-time");
+    const dateEl = document.getElementById("topbar-date");
+
+    if (!timeEl || !dateEl) return;
+
+    timeEl.textContent = now.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+    });
+
+    dateEl.textContent = now.toLocaleDateString("id-ID", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+setInterval(updateTopbarClock, 1000);
+updateTopbarClock();

@@ -170,10 +170,10 @@
     </button>
 </div>
         </aside> -->
-        <aside id="sidebar"
+        <!-- <aside id="sidebar"
             class="fixed left-0 top-0 h-full w-72 bg-white shadow-xl p-5 hidden md:flex flex-col">
 
-            <!-- PROFILE CARD -->
+
             <div class="bg-gradient-to-br from-indigo-600 to-blue-500 rounded-3xl p-5 text-white shadow-lg mb-6">
 
                 <div class="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold mb-4">
@@ -188,14 +188,91 @@
                     class="text-sm text-white/90 mt-1"></p>
             </div>
 
-            <!-- MENU -->
             <nav id="nav-menu" class="space-y-2 flex-1"></nav>
 
-            <!-- LOGOUT -->
+
             <div class="pt-6">
                 <button onclick="logout()"
                     class="w-full bg-red-500 hover:bg-red-600 text-white p-3 rounded-2xl shadow-md active:scale-95 transition font-medium">
                     ⏻ Logout
+                </button>
+            </div>
+
+        </aside> -->
+        <header id="desktop-topbar" class="desktop-topbar hidden md:flex">
+
+            <div class="topbar-page-info">
+                <h1 id="topbar-title">Dashboard Wali</h1>
+                <p id="topbar-subtitle">Monitoring absensi siswa bimbingan</p>
+            </div>
+
+            <div class="topbar-actions">
+
+                <!-- JAM -->
+                <div class="topbar-clock">
+                    <i class="fa-regular fa-clock"></i>
+                    <div>
+                        <strong id="topbar-time">00:00:00</strong>
+                        <span id="topbar-date">-</span>
+                    </div>
+                </div>
+
+                <!-- NOTIFIKASI IZIN -->
+                <button class="topbar-notif" title="Pengajuan izin">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="izin-badge">0</span>
+                </button>
+
+                <!-- FOTO GURU -->
+                <div class="topbar-profile">
+                    <img id="topbar-user-photo"
+                        src="https://ui-avatars.com/api/?name=Guru&background=2563eb&color=fff"
+                        alt="Foto Guru">
+
+                    <div>
+                        <strong id="topbar-user-name">Guru</strong>
+                        <span id="topbar-user-role">Pembimbing</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+        <aside id="sidebar"
+            class="fixed left-0 top-0 h-full w-72 shadow-2xl p-5 hidden md:flex flex-col">
+
+            <!-- BRAND -->
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <img src="Logo.png" alt="Logo Sekolah">
+                </div>
+                <div>
+                    <h1>Absensi PKL</h1>
+                    <p>Selfie + Lokasi</p>
+                </div>
+            </div>
+
+            <!-- PROFILE CARD -->
+            <!-- <div class="sidebar-profile">
+                <div class="profile-glow"></div>
+
+                <div class="profile-avatar">
+                    <span id="nav-user-avatar-desktop">A</span>
+                </div>
+
+                <h2 id="nav-user-name"></h2>
+                <p id="nav-user-role"></p>
+                <span id="nav-user-kategori"></span>
+            </div> -->
+
+            <!-- MENU -->
+            <nav id="nav-menu" class="sidebar-menu flex-1"></nav>
+
+            <!-- LOGOUT -->
+            <div class="pt-6">
+                <button onclick="logout()" class="sidebar-logout">
+                    <i class="fa-solid fa-power-off"></i>
+                    Logout
                 </button>
             </div>
 
@@ -321,13 +398,28 @@
 
             <!-- WALI DASHBOARD -->
             <section id="page-wali-dashboard" class="hidden-page p-4 space-y-4">
-                <div class="bg-white rounded-2xl p-4 shadow">
-                    <h2 class="text-lg font-bold text-slate-800">
-                        Dashboard Wali/Pembimbing
-                    </h2>
-                    <p class="text-sm text-gray-500">
-                        Monitoring absensi siswa bimbingan
-                    </p>
+                <!-- HEADER CARD -->
+                <div class="wali-header-card">
+                    <div class="wali-header-left">
+                        <div class="wali-avatar">
+                            <span id="wali-avatar">W</span>
+                        </div>
+                        <div>
+                            <p class="wali-label">
+                                Monitoring Pembimbing
+                            </p>
+                            <h2 id="wali-nama"
+                                class="wali-nama">
+                            </h2>
+                            <div class="wali-meta">
+                                <span id="">Guru</span>
+                                <span id="wali-kategori"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wali-header-icon">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </div>
                 </div>
                 <!-- TOGGLE MODE -->
                 <div class="bg-white rounded-2xl p-2 shadow">

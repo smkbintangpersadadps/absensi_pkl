@@ -14,6 +14,37 @@ let pageCleanup = null;
 // ===============================
 // NAVIGATE PAGE
 // ===============================
+// function navigateTo(pageId) {
+
+//     // 1. RUN CLEANUP PAGE SEBELUMNYA
+//     if (typeof pageCleanup === "function") {
+//         try {
+//             pageCleanup();
+//         } catch (e) {
+//             console.warn("Cleanup error:", e);
+//         }
+//         pageCleanup = null;
+//     }
+
+//     // 2. HIDE ALL PAGES
+//     const pages = document.querySelectorAll("section[id^='page-']");
+//     pages.forEach(p => p.classList.add("hidden-page"));
+
+//     // 3. SHOW TARGET PAGE
+//     const target = document.getElementById(pageId);
+//     if (target) target.classList.remove("hidden-page");
+
+//     // 4. TOGGLE LAYOUT
+//     const layout = document.getElementById("layout-main");
+//     if (layout) {
+//         layout.classList.toggle("hidden-page", pageId === "page-login");
+//     }
+
+//     // 5. PAGE LOADER
+//     runPageLoader(pageId);
+//     setActiveNav(pageId); // 👈 panggil di sini
+// }
+
 function navigateTo(pageId) {
 
     // 1. RUN CLEANUP PAGE SEBELUMNYA
@@ -40,9 +71,23 @@ function navigateTo(pageId) {
         layout.classList.toggle("hidden-page", pageId === "page-login");
     }
 
-    // 5. PAGE LOADER
+    // 5. ACTIVE SIDEBAR MENU
+    document.querySelectorAll(".sidebar-link").forEach(link => {
+        link.classList.remove("active");
+    });
+
+    const activeLink = document.querySelector(`.sidebar-link[data-page="${pageId}"]`);
+    if (activeLink) {
+        activeLink.classList.add("active");
+    }
+
+    // 6. PAGE LOADER
     runPageLoader(pageId);
-    setActiveNav(pageId); // 👈 panggil di sini
+
+    // 7. ACTIVE NAV BAWAH / NAV LAINNYA
+    if (typeof setActiveNav === "function") {
+        setActiveNav(pageId);
+    }
 }
 
 // ===============================
@@ -125,17 +170,17 @@ function buildMenu(user) {
 
     else if (role === "wali") {
         menu.innerHTML = `
-            <a href="#" onclick="navigateTo('page-wali-dashboard')"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
-            <i class="fa-solid fa-chart-line w-5"></i>
-            <span>Dashboard Monitoring</span>
-        </a>
+            <a href="#" data-page="page-wali-dashboard" onclick="navigateTo('page-wali-dashboard')"
+                class="sidebar-link active">
+                <i class="fa-solid fa-chart-line w-5"></i>
+                <span>Dashboard Monitoring</span>
+            </a>
 
-        <a href="#" onclick="navigateTo('page-wali-history')"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
-            <i class="fa-solid fa-clock-rotate-left w-5"></i>
-            <span>Riwayat</span>
-        </a>
+            <a href="#" data-page="page-wali-history" onclick="navigateTo('page-wali-history')"
+                class="sidebar-link">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i>
+                <span>Riwayat</span>
+            </a>
         `;
     }
 
