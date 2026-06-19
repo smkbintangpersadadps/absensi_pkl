@@ -933,3 +933,202 @@ button:disabled {
 .sidebar-link.active i {
     color: white;
 }
+
+/* =========================
+   TOM SELECT MODERN
+========================= */
+
+.ts-wrapper.single .ts-control {
+    min-height: 50px;
+    font-size: 16px !important;
+    border-radius: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+    align-items: center; /* Vertikal tengah */
+    background: #ffffff !important;
+
+    box-shadow:
+        0 1px 3px rgba(0,0,0,.05);
+
+    padding: 10px 14px !important;
+
+    transition: all .25s ease;
+}
+
+.ts-wrapper.single.focus .ts-control {
+    border-color: #6366f1 !important;
+    font-size: 16px !important;
+    align-items: center; /* Vertikal tengah */
+    box-shadow:
+        0 0 0 4px rgba(99,102,241,.12) !important;
+}
+
+.ts-control input {
+    font-size: 14px !important;
+    color: #0f172a !important;
+}
+
+.ts-control input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Dropdown */
+.ts-dropdown {
+    border-radius: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.12);
+}
+
+/* Option */
+.ts-dropdown .option {
+    padding: 12px 16px;
+    font-size: 14px;
+    align-items: center; /* Vertikal tengah */
+
+    transition: all .15s ease;
+}
+
+.ts-dropdown .option:hover {
+    background: #eef2ff !important;
+    color: #4338ca;
+}
+
+.ts-dropdown .active {
+    background: #eef2ff !important;
+    color: #4338ca !important;
+}
+
+/* Arrow */
+.ts-wrapper.single .ts-control:after {
+    border-color: #64748b transparent transparent transparent !important;
+}
+
+.lokasi-select-wrapper {
+    position: relative;
+}
+
+.lokasi-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6366f1;
+    z-index: 20;
+    pointer-events: none;
+}
+
+/* Geser isi TomSelect */
+.lokasi-select-wrapper .ts-wrapper.single .ts-control {
+    padding-left: 42px !important;
+}
+
+/*FOOTER*/
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 288px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(99,102,241,.08),
+            rgba(59,130,246,.08)
+        );
+
+    backdrop-filter: blur(10px);
+
+    border-top: 1px solid rgba(99,102,241,.15);
+
+    z-index: 900;
+}
+
+@media (max-width: 768px) {
+    .footer-fixed {
+        display: none;
+    }
+    #layout-main {
+        padding-top: 72px;
+    }
+
+   
+}
+
+#layout-main {
+    padding-bottom: 80px;
+}
+
+/*RIWAYAT ABSEN BENTUK CARD*/
+.history-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 18px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .08);
+    display: grid;
+    grid-template-columns: 85px 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.history-date {
+    text-align: center;
+}
+
+.history-date .day {
+    font-size: 42px;
+    line-height: 1;
+    font-weight: 500;
+    color: #334155;
+}
+
+.history-date .month {
+    font-size: 14px;
+    color: #414a57;
+    font-weight: 400;
+    margin-top: 6px;
+}
+
+.history-action {
+    text-align: center;
+}
+
+.history-badge {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.history-badge.in {
+    background: #16a34a;
+}
+
+.history-badge.out {
+    background: #dc2626;
+}
+
+.history-time {
+    font-size: 18px;
+    color: #475569;
+}
+
+.history-time {
+    min-height: 24px;
+}
+
+.history-note {
+    min-height: 16px;
+    color: #ec8027;
+}
+
+.history-weekday {
+    font-size: 14px;
+    font-weight: 1000;
+    color: #6366f1;
+    letter-spacing: 1px;
+}

@@ -228,7 +228,8 @@ function setupUserInterface() {
     const roleMap = {
         admin: "Administrator",
         wali: "Wali / Pembimbing",
-        siswa: "Siswa"
+        siswa: "Siswa",
+        kepsek: "Kepala Sekolah"
     };
 
     const roleLabel = roleMap[user.role] || user.role;
@@ -302,6 +303,11 @@ function setupUserInterface() {
 
         case "siswa":
             pilihModeSiswaOrtu();
+            break;
+        
+        case "kepsek":
+            showLoader("Memuat dashboard kepala sekolah...");
+            navigateTo("page-kepsek-dashboard");
             break;
 
         default:

@@ -147,6 +147,10 @@ function runPageLoader(pageId) {
         case "page-history":
             loadHistory?.();
             break;
+        
+        case "page-kepsek-dashboard":
+            loadKepsekDashboard?.(true);
+            break;
     }
 }
 
@@ -180,6 +184,16 @@ function buildMenu(user) {
                 class="sidebar-link">
                 <i class="fa-solid fa-clock-rotate-left w-5"></i>
                 <span>Riwayat</span>
+            </a>
+        `;
+    }
+
+    else if (role === "kepsek") {
+        menu.innerHTML = `
+            <a href="#" onclick="navigateTo('page-kepsek-dashboard')"
+                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <i class="fa-solid fa-school w-5"></i>
+                <span>Dashboard Kepsek</span>
             </a>
         `;
     }
@@ -273,6 +287,21 @@ function buildMobileBottomMenu(user) {
 
                 <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                 <span>Riwayat</span>
+            </button>
+        `;
+    }
+
+    // ===============================
+    // KEPALA SEKOLAH
+    // ===============================
+    else if (role === "kepsek") {
+
+        menu.innerHTML = `
+            <button onclick="navigateTo('page-kepsek-dashboard')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                <i class="fa-solid fa-school text-lg"></i>
+                <span>Kepsek</span>
             </button>
         `;
     }

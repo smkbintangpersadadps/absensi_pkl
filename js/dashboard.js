@@ -1,4 +1,271 @@
 // ===============================
+// KEPSEK DASHBOARD
+// ===============================
+let kepsekMap = null;
+let kepsekMarkers = [];
+let kepsekLokasiSelect = null;
+
+async function loadKepsekDashboard(useLoader = false) {
+    try {
+        const user = AppState.currentUser;
+        if (!user) return;
+
+        if (useLoader) {
+            showLoader("Memuat dashboard kepala sekolah...");
+        }
+
+        const lokasiId =
+            document.getElementById("kepsek-filter-lokasi")?.value || "ALL";
+
+        const data = await ApiService.call({
+            action: "get_kepsek_dashboard",
+            lokasiId
+        });
+
+        const summary = data.summary || {};
+        const lokasiList = data.lokasiList || [];
+        const siswa = data.siswa || [];
+        const rekapIndustri = data.rekapIndustri || [];
+
+        renderKepsekFilter(lokasiList, lokasiId);
+        renderKepsekSummary(summary);
+        renderKepsekRekapIndustri(rekapIndustri, lokasiId);
+        renderKepsekTable(siswa);
+        renderKepsekMap(rekapIndustri, lokasiId);
+
+    } catch (error) {
+        console.error("Kepsek dashboard error:", error);
+        showToast("Gagal memuat dashboard kepala sekolah", true);
+
+    } finally {
+        hideLoader();
+    }
+}
+
+function renderKepsekFilter(lokasiList, selected) {
+    const select = document.getElementById("kepsek-filter-lokasi");
+    if (!select) return;
+
+    if (kepsekLokasiSelect) {
+        kepsekLokasiSelect.destroy();
+        kepsekLokasiSelect = null;
+    }
+
+    select.innerHTML = `
+        <option value="ALL">Semua Lokasi</option>
+        ${lokasiList.map(l => `
+            <option value="${l.lokasiId}" ${selected === l.lokasiId ? "selected" : ""}>
+                ${l.namaIndustri}
+            </option>
+        `).join("")}
+    `;
+
+    kepsekLokasiSelect = new TomSelect("#kepsek-filter-lokasi", {
+        create: false,
+        allowEmptyOption: true,
+        placeholder: "Ketik nama lokasi PKL...",
+        sortField: {
+            field: "text",
+            direction: "asc"
+        }
+    });
+
+    kepsekLokasiSelect.setValue(selected || "ALL");
+}
+
+function renderKepsekSummary(summary) {
+    document.getElementById("kepsek-total-siswa").innerText =
+        summary.totalSiswa || 0;
+
+    document.getElementById("kepsek-total-hadir").innerText =
+        summary.totalHadir || 0;
+
+    document.getElementById("kepsek-total-belum").innerText =
+        summary.totalBelum || 0;
+
+    document.getElementById("kepsek-total-industri").innerText =
+        summary.totalIndustri || 0;
+}
+
+function renderKepsekRekapIndustri(rekap, lokasiId) {
+    const box = document.getElementById("kepsek-rekap-industri");
+    if (!box) return;
+
+    const data = lokasiId === "ALL"
+        ? rekap
+        : rekap.filter(r => r.lokasiId === lokasiId);
+
+    if (!data.length) {
+        box.innerHTML = `
+            <div class="text-sm text-slate-500">
+                Tidak ada data industri
+            </div>
+        `;
+        return;
+    }
+
+    box.innerHTML = data.map(r => `
+        <div class="border rounded-2xl p-4">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h4 class="font-semibold text-slate-800">
+                        ${r.namaIndustri}
+                    </h4>
+                    <p class="text-xs text-slate-500 mt-1">
+                        ${r.alamat || "-"}
+                    </p>
+                </div>
+
+                <span class="text-sm font-bold text-indigo-600">
+                    ${r.persentase}%
+                </span>
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-2 text-center text-sm">
+                <div class="bg-slate-50 rounded-xl p-2">
+                    <div class="font-bold">${r.totalSiswa}</div>
+                    <div class="text-xs text-slate-500">Siswa</div>
+                </div>
+
+                <div class="bg-green-50 rounded-xl p-2">
+                    <div class="font-bold text-green-600">${r.hadir}</div>
+                    <div class="text-xs text-slate-500">Hadir</div>
+                </div>
+
+                <div class="bg-red-50 rounded-xl p-2">
+                    <div class="font-bold text-red-600">${r.belumHadir}</div>
+                    <div class="text-xs text-slate-500">Belum</div>
+                </div>
+            </div>
+        </div>
+    `).join("");
+}
+
+function renderKepsekTable(siswa) {
+    const tbody = document.getElementById("kepsek-table-body");
+    if (!tbody) return;
+
+    if ($.fn.DataTable.isDataTable("#kepsek-table")) {
+        $("#kepsek-table").DataTable().clear().destroy();
+    }
+
+    if (!siswa.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center p-4 text-slate-500">
+                    Tidak ada data siswa
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = siswa.map(s => `
+        <tr>
+            <td>${s.nama || "-"}</td>
+            <td>${s.kategori || "-"}</td>
+            <td>${s.namaIndustri || "-"}</td>
+            <td>${s.jamMasuk || "-"}</td>
+            <td>
+                <span class="px-2 py-1 rounded-full text-xs ${
+                    s.statusHadir === "Hadir"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                }">
+                    ${s.statusHadir}
+                </span>
+            </td>
+            <td>
+                ${
+                    s.maps
+                        ? `<a href="${s.maps}" target="_blank" class="text-indigo-600 font-medium">Maps</a>`
+                        : "-"
+                }
+            </td>
+        </tr>
+    `).join("");
+
+    $("#kepsek-table").DataTable({
+        pageLength: 10,
+        ordering: true,
+        searching: true,
+        scrollX: true,
+        autoWidth: false,
+        destroy: true,
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            paginate: {
+                next: "›",
+                previous: "‹"
+            },
+            zeroRecords: "Data tidak ditemukan"
+        }
+    });
+}
+
+function renderKepsekMap(rekap, lokasiId) {
+    const mapEl = document.getElementById("kepsek-map");
+    if (!mapEl || typeof L === "undefined") return;
+
+    const data = lokasiId === "ALL"
+        ? rekap
+        : rekap.filter(r => r.lokasiId === lokasiId);
+
+    if (!kepsekMap) {
+        kepsekMap = L.map("kepsek-map").setView([-8.65, 115.21], 10);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap"
+        }).addTo(kepsekMap);
+    }
+
+    kepsekMarkers.forEach(m => kepsekMap.removeLayer(m));
+    kepsekMarkers = [];
+
+    const bounds = [];
+
+    data.forEach(r => {
+        const lat = parseFloat(r.lat);
+        const lng = parseFloat(r.lng);
+
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        let color = "red";
+        if (r.totalSiswa > 0 && r.belumHadir === 0) color = "green";
+        else if (r.hadir > 0) color = "orange";
+
+        const marker = L.circleMarker([lat, lng], {
+            radius: 10,
+            color,
+            fillColor: color,
+            fillOpacity: 0.8
+        }).addTo(kepsekMap);
+
+        marker.bindPopup(`
+            <b>${r.namaIndustri}</b><br>
+            Total: ${r.totalSiswa}<br>
+            Hadir: ${r.hadir}<br>
+            Belum: ${r.belumHadir}
+        `);
+
+        kepsekMarkers.push(marker);
+        bounds.push([lat, lng]);
+    });
+
+    if (bounds.length) {
+        kepsekMap.fitBounds(bounds, {
+            padding: [30, 30]
+        });
+    }
+
+    setTimeout(() => {
+        kepsekMap.invalidateSize();
+    }, 300);
+}
+
+// ===============================
 // WALI DASHBOARD
 // ===============================
 function setMonitoringMode(mode) {
@@ -624,4 +891,134 @@ function getAttendanceProgress(totalHadir) {
     const percent = (totalHadir / targetHariKerja) * 100;
 
     return Math.min(percent, 100);
+}
+
+//Riwayat Absen Bentuk CARD
+function renderStudentHistoryCards(riwayat) {
+    const container = document.getElementById("student-history-list");
+    if (!container) return;
+
+    const monthEl = document.getElementById("student-history-month");
+    const yearEl = document.getElementById("student-history-year");
+
+    const selectedMonth = Number(monthEl?.value || (new Date().getMonth() + 1));
+    const selectedYear = Number(yearEl?.value || new Date().getFullYear());
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    let jumlahHari = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    if (selectedMonth === currentMonth && selectedYear === currentYear) {
+        jumlahHari = now.getDate();
+    }
+
+    const grouped = {};
+
+    (riwayat || []).forEach(r => {
+        const tanggalText = r.timestamp?.split(" ")[0];
+        if (!tanggalText) return;
+
+        const [day, month, year] = tanggalText.split("/").map(Number);
+
+        if (month !== selectedMonth || year !== selectedYear) return;
+
+        if (!grouped[day]) {
+            grouped[day] = {
+                masuk: null,
+                pulang: null
+            };
+        }
+
+        if (r.tipe === "Masuk") grouped[day].masuk = r;
+        if (r.tipe === "Pulang") grouped[day].pulang = r;
+    });
+
+    let html = "";
+
+    for (let day = jumlahHari; day >= 1; day--) {
+        const masuk = grouped[day]?.masuk;
+        const pulang = grouped[day]?.pulang;
+
+        html += `
+            <div class="history-card">
+                <div class="history-date">
+                    <div class="history-weekday">
+                        ${getDayName(day, selectedMonth, selectedYear)}
+                    </div>
+                    <div class="day">
+                        ${day}
+                    </div>
+                    <div class="month">
+                        ${getMonthShort(selectedMonth)} ${selectedYear}
+                    </div>
+                </div>
+
+                <div class="history-action">
+                    <div class="history-badge in">Scan In</div>
+                    <div class="history-time">
+                        ${masuk ? masuk.timestamp.split(" ")[1] : "00:00:00"}
+                    </div>
+                    <div class="history-note">
+                        ${masuk ? `${Math.round(masuk.jarak || 0)} meter` : "Belum absen"}
+                    </div>
+                </div>
+
+                <div class="history-action">
+                    <div class="history-badge out">
+                        Scan Out
+                    </div>
+                    <div class="history-time">
+                        ${pulang ? pulang.timestamp.split(" ")[1] : "00:00:00"}
+                    </div>
+                    <div class="history-note">
+                        ${pulang
+                            ? `${Math.round(pulang.jarak || 0)} meter`
+                            : "Belum absen"}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+function getDayName(day, month, year) {
+    const days = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu"
+    ];
+
+    return days[new Date(year, month - 1, day).getDay()];
+}
+
+function getMonthShort(month) {
+    const months = [
+        "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+        "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    ];
+
+    return months[month - 1] || "";
+}
+
+function initStudentHistoryFilter() {
+    const now = new Date();
+
+    const monthEl = document.getElementById("student-history-month");
+    const yearEl = document.getElementById("student-history-year");
+
+    if (monthEl) {
+        monthEl.value = now.getMonth() + 1;
+    }
+
+    if (yearEl) {
+        yearEl.value = now.getFullYear();
+    }
 }

@@ -2,10 +2,30 @@
 // HISTORY + DASHBOARD STATS
 // ===============================
 
+// async function loadHistory() {
+//     try {
+//         const user = AppState.currentUser;
+
+//         if (!user) return;
+
+//         const data = await ApiService.call({
+//             action: "get_riwayat",
+//             role: user.role,
+//             username: user.username
+//         });
+
+//         AppState.riwayat = data;
+
+//         renderHistoryTable(data);
+
+//     } catch (error) {
+//         console.error("Load history error:", error);
+//         showToast("Gagal memuat riwayat", true);
+//     }
+// }
 async function loadHistory() {
     try {
         const user = AppState.currentUser;
-
         if (!user) return;
 
         const data = await ApiService.call({
@@ -15,6 +35,14 @@ async function loadHistory() {
         });
 
         AppState.riwayat = data;
+
+        const role = String(user.role || "").trim().toLowerCase();
+
+        if (role === "siswa" || role === "peserta") {
+            initStudentHistoryFilter();
+            renderStudentHistoryCards(data);
+            return;
+        }
 
         renderHistoryTable(data);
 
