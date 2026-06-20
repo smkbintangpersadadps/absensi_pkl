@@ -88,6 +88,8 @@ function navigateTo(pageId) {
     if (typeof setActiveNav === "function") {
         setActiveNav(pageId);
     }
+    console.log("NAVIGATE TO:", pageId);
+    console.log("TARGET:", document.getElementById(pageId));
 }
 
 // ===============================
@@ -126,6 +128,10 @@ function runPageLoader(pageId) {
         case "page-wali-history":
             setHistoryMode?.(AppState.historyMode || "wali");
             break;
+        
+        case "page-wali-approval":
+            setApprovalMode?.(AppState.approvalMode || "wali");
+            break;
                 
         case "page-user-dashboard":
             loadUserDashboardStats?.();
@@ -142,6 +148,14 @@ function runPageLoader(pageId) {
             }
 
             initAbsenForm?.();
+            break;
+        
+        case "page-user-status":
+            initStatusHarianForm?.();
+            break;
+
+        case "page-user-status-history":
+            loadStatusHistory?.(true);
             break;
 
         case "page-history":
@@ -180,6 +194,12 @@ function buildMenu(user) {
                 <span>Dashboard Monitoring</span>
             </a>
 
+            <a href="#" onclick="navigateTo('page-wali-approval')"
+                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <i class="fa-solid fa-clipboard-check w-5"></i>
+                <span>Approval Status</span>
+            </a>
+
             <a href="#" data-page="page-wali-history" onclick="navigateTo('page-wali-history')"
                 class="sidebar-link">
                 <i class="fa-solid fa-clock-rotate-left w-5"></i>
@@ -208,6 +228,12 @@ function buildMenu(user) {
             menu.innerHTML = `
                 <a href="#" onclick="navigateTo('page-user-dashboard')">Dashboard</a>
                 <a href="#" onclick="navigateTo('page-user-absen')">Absen</a>
+                <a href="#" onclick="navigateTo('page-user-status')">Konfirmasi Kehadiran</a>
+                <a href="#" onclick="navigateTo('page-user-status-history')"
+                    class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                    <i class="fa-solid fa-list-check w-5"></i>
+                    <span>Riwayat Status</span>
+                </a>
                 <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
             `;
         }
@@ -218,7 +244,8 @@ function setActiveNav(pageId) {
     const map = {
         "page-user-dashboard": 0,
         "page-user-absen": 1,
-        "page-history": 2
+        "page-user-status": 2,
+        "page-history": 3
     };
 
     const index = map[pageId];
@@ -282,6 +309,12 @@ function buildMobileBottomMenu(user) {
                 <span>Monitoring</span>
             </button>
 
+            <button onclick="navigateTo('page-wali-approval')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-clipboard-check text-lg"></i>
+                <span>Approval</span>
+            </button>
+
             <button onclick="navigateTo('page-wali-history')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
 
@@ -332,6 +365,18 @@ function buildMobileBottomMenu(user) {
                 <button onclick="navigateTo('page-user-absen')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                     <i class="fa-solid fa-camera text-lg"></i>
                     <span>Absen</span>
+                </button>
+
+                <button onclick="navigateTo('page-user-status')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                    <span>Status</span>
+                </button>
+
+                <button onclick="navigateTo('page-user-status-history')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                    <span>Approval</span>
                 </button>
 
                 <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">

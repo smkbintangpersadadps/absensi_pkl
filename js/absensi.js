@@ -295,15 +295,70 @@ async function submitAbsensi() {
     }
 }
 
+// async function initAbsenForm() {
+//     await loadUserLocation();
+
+//     startCamera?.();
+//     startGPS?.();
+
+//     pageCleanup = () => {
+//         stopCamera?.();
+//     };
+// }
 async function initAbsenForm() {
-    await loadUserLocation();
+    const user = AppState.currentUser;
+    if (!user) return;
 
-    startCamera?.();
-    startGPS?.();
+    try {
+        showLoader("Memeriksa status hari ini...");
 
-    pageCleanup = () => {
-        stopCamera?.();
-    };
+        const status = await ApiService.call({
+            action: "cek_status_harian",
+            username: user.username
+        });
+
+        if (status.ada && !status.bolehAbsen) {
+            hideLoader();
+
+            Swal.fire({
+                icon: "info",
+                title: "Absensi Dinonaktifkan",
+                html: `
+                    <div style="text-align:left">
+                        <p>Hari ini Anda sudah mengirim status:</p>
+                        <p><b>${status.status}</b></p>
+                        <p>Status Approval: <b>${status.approval}</b></p>
+                        ${
+                            status.keterangan
+                                ? `<p>Keterangan: ${status.keterangan}</p>`
+                                : ""
+                        }
+                    </div>
+                `,
+                confirmButtonColor: "#4f46e5"
+            }).then(() => {
+                navigateTo("page-user-dashboard");
+            });
+
+            return;
+        }
+
+        await loadUserLocation();
+
+        startCamera?.();
+        startGPS?.();
+
+        pageCleanup = () => {
+            stopCamera?.();
+        };
+
+    } catch (error) {
+        console.error("Init absen error:", error);
+        showToast("Gagal membuka halaman absensi", true);
+
+    } finally {
+        hideLoader();
+    }
 }
 
 // ===============================

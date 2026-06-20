@@ -7,6 +7,8 @@ window.AppState = {
     monitoringMode: "wali",
     historyMode: "wali",
     accessMode: "siswa",
+    approvalMode: "wali", // 👈 tambah ini
+    
 
     // camera
     cameraStream: null,

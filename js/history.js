@@ -305,3 +305,89 @@ function setHistoryMode(mode) {
 
     loadWaliHistory?.(true);
 }
+
+async function loadStatusHistory(useLoader = false) {
+    try {
+        const user = AppState.currentUser;
+        if (!user) return;
+
+        if (useLoader) {
+            showLoader("Memuat riwayat status...");
+        }
+
+        const data = await ApiService.call({
+            action: "get_status_history",
+            username: user.username
+        });
+
+        const list = document.getElementById("status-history-list");
+        if (!list) return;
+
+        if (!data.length) {
+            list.innerHTML = `
+                <div class="bg-white rounded-2xl p-4 shadow text-center text-slate-500">
+                    Belum ada riwayat pengajuan status.
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = data.map(item => `
+            <div class="bg-white rounded-2xl p-4 shadow border border-slate-100">
+
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-slate-800">
+                            ${item.tanggal || "-"}
+                        </div>
+
+                        <div class="text-xs text-slate-500 mt-1">
+                            Diajukan: ${item.timestamp || "-"}
+                        </div>
+                    </div>
+
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(item.status)}">
+                        ${item.status || "-"}
+                    </span>
+                </div>
+
+                ${
+                    item.keterangan
+                        ? `<div class="mt-3 text-sm text-slate-600 bg-slate-50 rounded-xl p-3">
+                            ${item.keterangan}
+                           </div>`
+                        : ""
+                }
+
+                <div class="mt-3 flex items-center justify-between">
+                    <span class="text-xs text-slate-500">
+                        Status
+                    </span>
+
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${getApprovalBadgeClass(item.approval)}">
+                        ${item.approval || "Pending"}
+                    </span>
+                </div>
+
+                ${item.approvedByNama
+                ? `<div class="mt-2 text-[11px] text-slate-400">
+                    Diproses oleh :
+                    <span class="font-medium text-slate-600">
+                        ${item.approvedByNama}
+                    </span>
+                    </div>`
+                : ""}
+
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error("Status history error:", error);
+        showToast("Gagal memuat riwayat status", true);
+
+    } finally {
+        hideLoader();
+    }
+}
+
+

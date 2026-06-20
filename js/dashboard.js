@@ -17,9 +17,23 @@ async function loadKepsekDashboard(useLoader = false) {
         const lokasiId =
             document.getElementById("kepsek-filter-lokasi")?.value || "ALL";
 
+        const tanggalEl = document.getElementById("kepsek-filter-tanggal");
+
+        if (tanggalEl && !tanggalEl.value) {
+            const now = new Date();
+
+            tanggalEl.value =
+                now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, "0") + "-" +
+                String(now.getDate()).padStart(2, "0");
+        }
+
+        const tanggal = tanggalEl?.value || "";
+
         const data = await ApiService.call({
             action: "get_kepsek_dashboard",
-            lokasiId
+            lokasiId,
+            tanggal
         });
 
         const summary = data.summary || {};
@@ -85,6 +99,39 @@ function renderKepsekSummary(summary) {
 
     document.getElementById("kepsek-total-industri").innerText =
         summary.totalIndustri || 0;
+
+    const statusEl = document.getElementById("kepsek-total-status");
+    if (statusEl) {
+        statusEl.innerText = summary.totalStatusKhusus || 0;
+    }
+
+    const pendingEl = document.getElementById("kepsek-total-pending");
+    if (pendingEl) {
+        pendingEl.innerText = summary.totalPendingApproval || 0;
+    }
+}
+
+function getKepsekStatusBadge(status) {
+    switch (String(status || "").trim().toLowerCase()) {
+        case "hadir":
+            return "bg-green-100 text-green-700";
+
+        case "belum konfirmasi":
+            return "bg-red-100 text-red-700";
+
+        case "pending approval":
+            return "bg-orange-100 text-orange-700";
+
+        case "day off":
+        case "izin":
+        case "sakit":
+        case "libur industri":
+        case "lupa absen":
+            return "bg-amber-100 text-amber-700";
+
+        default:
+            return "bg-slate-100 text-slate-700";
+    }
 }
 
 function renderKepsekRekapIndustri(rekap, lokasiId) {
@@ -167,11 +214,7 @@ function renderKepsekTable(siswa) {
             <td>${s.namaIndustri || "-"}</td>
             <td>${s.jamMasuk || "-"}</td>
             <td>
-                <span class="px-2 py-1 rounded-full text-xs ${
-                    s.statusHadir === "Hadir"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                }">
+                <span class="px-2 py-1 rounded-full text-xs font-semibold ${getKepsekStatusBadge(s.statusHadir)}">
                     ${s.statusHadir}
                 </span>
             </td>
@@ -330,11 +373,8 @@ function setMonitoringMode(mode) {
 }
 
 async function loadWaliDashboard(useLoader = false) {
-
     try {
-
         const user = AppState.currentUser;
-
         if (!user) return;
 
         if (useLoader) {
@@ -354,14 +394,16 @@ async function loadWaliDashboard(useLoader = false) {
 
         const siswa = data.siswa || [];
         const riwayat = data.riwayat || [];
+
         const contentBox = document.getElementById("wali-dashboard-content");
         const emptyBox = document.getElementById("wali-dashboard-empty");
 
-            if (contentBox) contentBox.classList.remove("hidden");
-            if (emptyBox) {
-                emptyBox.classList.add("hidden");
-                emptyBox.innerHTML = "";
-            }
+        if (contentBox) contentBox.classList.remove("hidden");
+
+        if (emptyBox) {
+            emptyBox.classList.add("hidden");
+            emptyBox.innerHTML = "";
+        }
 
         if (AppState.monitoringMode === "wali" && siswa.length === 0) {
             if (contentBox) contentBox.classList.add("hidden");
@@ -410,190 +452,465 @@ async function loadWaliDashboard(useLoader = false) {
             (today.getMonth() + 1).toString().padStart(2, "0") + "/" +
             today.getFullYear();
 
-        // ===============================
-        // SISWA SUDAH HADIR
-        // ===============================
         const hadirHariIni = riwayat.filter(r =>
             r.timestamp?.startsWith(todayStr) &&
             r.tipe === "Masuk"
         );
 
         const hadirUsernames = new Set(
-            hadirHariIni.map(r => r.username)
+            hadirHariIni.map(r => String(r.username || "").trim())
         );
-        document.getElementById("wali-nama").textContent =
-            user.namaLengkap ||
-            user.nama ||
-            user["Nama Lengkap"] ||
-            "-";
 
-        // document.getElementById("wali-role").textContent =
-        //     user.role ||
-        //     user.Role ||
-        //     user["Role"] ||
-        //     "-";
+        const statusKhusus = siswa.filter(s =>
+            s.statusHarian &&
+            String(s.approvalStatus || "").trim().toLowerCase() === "approved" &&
+            !hadirUsernames.has(String(s.username || "").trim())
+        );
 
-        document.getElementById("wali-kategori").textContent =
-            user.kategori ||
-            user.Kategori ||
-            user["Kategori"] ||
-            "-";
+        const statusPending = siswa.filter(s =>
+            s.statusHarian &&
+            String(s.approvalStatus || "").trim().toLowerCase() === "pending" &&
+            !hadirUsernames.has(String(s.username || "").trim())
+        );
 
-        document.getElementById("wali-avatar").textContent =
-            (
+        const statusUsernames = new Set(
+            statusKhusus.map(s => String(s.username || "").trim()),
+            statusPending.map(s => String(s.username || "").trim())
+        );
+
+        const belumHadir = siswa.filter(s =>
+            !hadirUsernames.has(String(s.username || "").trim()) &&
+            !statusUsernames.has(String(s.username || "").trim())
+        );
+
+        // ===============================
+        // PROFILE WALI
+        // ===============================
+        const waliNama = document.getElementById("wali-nama");
+        const waliKategori = document.getElementById("wali-kategori");
+        const waliAvatar = document.getElementById("wali-avatar");
+
+        if (waliNama) {
+            waliNama.textContent =
                 user.namaLengkap ||
                 user.nama ||
                 user["Nama Lengkap"] ||
-                "W"
-            ).charAt(0).toUpperCase();
+                "-";
+        }
 
-        // ===============================
-        // SISWA BELUM HADIR
-        // ===============================
-        const belumHadir = siswa.filter(s =>
-            !hadirUsernames.has(s.username)
-        );
+        if (waliKategori) {
+            waliKategori.textContent =
+                user.kategori ||
+                user.Kategori ||
+                user["Kategori"] ||
+                "-";
+        }
+
+        if (waliAvatar) {
+            waliAvatar.textContent =
+                (
+                    user.namaLengkap ||
+                    user.nama ||
+                    user["Nama Lengkap"] ||
+                    "W"
+                ).charAt(0).toUpperCase();
+        }
 
         // ===============================
         // SUMMARY
         // ===============================
-        document.getElementById(
-            "wali-total-siswa"
-        ).innerText = siswa.length;
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = value;
+        };
 
-        document.getElementById(
-            "wali-sudah-hadir"
-        ).innerText = hadirHariIni.length;
+        setText("wali-total-siswa", siswa.length);
+        setText("wali-sudah-hadir", hadirHariIni.length);
+        setText("wali-belum-hadir", belumHadir.length);
+        setText("wali-status-khusus", statusKhusus.length);
 
-        document.getElementById(
-            "wali-belum-hadir"
-        ).innerText = belumHadir.length;
-
-        // ===============================
-        // COUNTER BADGE
-        // ===============================
-        document.getElementById(
-            "wali-belum-count"
-        ).innerText = `${belumHadir.length} siswa`;
-
-        document.getElementById(
-            "wali-hadir-count"
-        ).innerText = `${hadirHariIni.length} siswa`;
+        setText("wali-belum-count", `${belumHadir.length} siswa`);
+        setText("wali-hadir-count", `${hadirHariIni.length} siswa`);
+        setText("wali-status-count", `${statusKhusus.length} siswa`);
 
         // ===============================
         // BELUM HADIR LIST
         // ===============================
-        const belumList =
-            document.getElementById(
-                "wali-belum-list"
-            );
+        const belumList = document.getElementById("wali-belum-list");
 
         if (belumList) {
-
             if (!belumHadir.length) {
-
                 belumList.innerHTML = `
                     <div class="text-sm text-green-600">
-                        Semua siswa sudah hadir
+                        Tidak ada siswa yang belum konfirmasi
                     </div>
                 `;
-
             } else {
-
-                belumList.innerHTML =
-                    belumHadir.map(s => `
-
-                        <div class="border rounded-xl p-3">
-
-                            <div class="font-medium text-slate-800">
-                                ${s.nama}
-                            </div>
-
-                            <div class="text-xs text-slate-500 mt-1 flex items-center gap-1 flex-wrap">
-                                <span>${s.kategori}</span>
-                                <span>•</span>
-                                <a href="${s.mapsUrl || '#'}"
-                                    target="_blank"
-                                    class="text-indigo-600 hover:underline">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                    ${s.namaIndustri || "Belum diatur"}
-                                </a>
-                            </div>
+                belumList.innerHTML = belumHadir.map(s => `
+                    <div class="border rounded-xl p-3">
+                        <div class="font-medium text-slate-800">
+                            ${s.nama || "-"}
                         </div>
-                    `).join("");
+
+                        <div class="text-xs text-slate-500 mt-1 flex items-center gap-1 flex-wrap">
+                            <span>${s.kategori || "-"}</span>
+                            <span>•</span>
+                            <a href="${s.mapsUrl || '#'}"
+                                target="_blank"
+                                class="text-indigo-600 hover:underline">
+                                <i class="fa-solid fa-location-dot"></i>
+                                ${s.namaIndustri || "Belum diatur"}
+                            </a>
+                        </div>
+                    </div>
+                `).join("");
             }
         }
 
         // ===============================
-        // SUDAH HADIR LIST
+        // HADIR LIST
         // ===============================
-        const hadirList =
-            document.getElementById(
-                "wali-hadir-list"
-            );
+        const hadirList = document.getElementById("wali-hadir-list");
 
         if (hadirList) {
-
             if (!hadirHariIni.length) {
-
                 hadirList.innerHTML = `
                     <div class="text-sm text-slate-500">
                         Belum ada siswa hadir
                     </div>
                 `;
-
             } else {
-
-                hadirList.innerHTML =
-                    hadirHariIni.map(r => `
-
-                        <div class="border rounded-xl p-3">
-
-                            <div class="flex items-center justify-between">
-
-                                <div>
-
-                                    <div class="font-medium text-slate-800">
-                                        ${r.nama}
-                                    </div>
-
-                                    <div class="text-xs text-slate-500 mt-1">
-                                        ${r.kategori}
-                                    </div>
-
+                hadirList.innerHTML = hadirHariIni.map(r => `
+                    <div class="border rounded-xl p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-medium text-slate-800">
+                                    ${r.nama || "-"}
                                 </div>
 
-                                <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
-                                    Hadir
-                                </span>
+                                <div class="text-xs text-slate-500 mt-1">
+                                    ${r.kategori || "-"}
+                                </div>
+                            </div>
+
+                            <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                Hadir
+                            </span>
+                        </div>
+
+                        <div class="mt-2 text-xs text-slate-500">
+                            ${r.timestamp || "-"}
+                        </div>
+                    </div>
+                `).join("");
+            }
+        }
+
+        // ===============================
+        // STATUS KHUSUS LIST
+        // ===============================
+        const statusList = document.getElementById("wali-status-list");
+
+        if (statusList) {
+            if (!statusKhusus.length) {
+                statusList.innerHTML = `
+                    <div class="text-sm text-slate-500">
+                        Tidak ada status khusus hari ini
+                    </div>
+                `;
+            } else {
+                statusList.innerHTML = statusKhusus.map(s => `
+                    <div class="border rounded-xl p-3 bg-amber-50 border-amber-100">
+
+                        <div class="flex items-start justify-between gap-2">
+
+                            <div class="min-w-0">
+
+                                <div class="font-medium text-slate-800 truncate">
+                                    ${s.nama || "-"}
+                                </div>
+
+                                <div class="text-xs text-slate-500">
+                                    ${s.kategori || "-"}
+                                </div>
 
                             </div>
 
-                            <div class="mt-2 text-xs text-slate-500">
-                                ${r.timestamp}
-                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusBadgeClass(s.statusHarian)}">
+                                ${s.statusHarian || "-"}
+                            </span>
 
                         </div>
 
-                    `).join("");
+                        ${
+                            s.keteranganStatus
+                                ? `
+                                    <div class="mt-2 text-xs text-slate-500 italic">
+                                        ${s.keteranganStatus}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                        ${
+                            s.approvalStatus
+                                ? `
+                                    <div class="mt-2 inline-flex px-2 py-1 rounded-full text-[11px] font-semibold ${getApprovalBadgeClass(s.approvalStatus)}">
+                                        ${s.approvalStatus}
+                                    </div>
+                                `
+                                : ""
+                        }
+
+                    </div>
+                `).join("");
+            }
+        }
+        // ===============================
+        // PENDING APPROVAL
+        // ===============================
+        setText("wali-pending-count", `${statusPending.length} siswa`);
+
+        const pendingList = document.getElementById("wali-pending-list");
+
+        if (pendingList) {
+            if (!statusPending.length) {
+                pendingList.innerHTML = `
+                    <div class="text-sm text-slate-500">
+                        Tidak ada pengajuan pending
+                    </div>
+                `;
+            } else {
+                pendingList.innerHTML = statusPending.map(s => `
+                    <div class="border rounded-xl p-3 bg-orange-50 border-orange-100">
+
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="font-medium text-slate-800 truncate">
+                                    ${s.nama || "-"}
+                                </div>
+
+                                <div class="text-xs text-slate-500">
+                                    ${s.kategori || "-"}
+                                </div>
+                            </div>
+
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getStatusBadgeClass(s.statusHarian)}">
+                                ${s.statusHarian || "-"}
+                            </span>
+                        </div>
+
+                        ${
+                            s.keteranganStatus
+                                ? `<div class="mt-2 text-xs text-slate-500 italic">${s.keteranganStatus}</div>`
+                                : ""
+                        }
+
+                        <div class="mt-2 text-[11px] font-medium text-orange-600">
+                            Menunggu Approval
+                        </div>
+
+                    </div>
+                `).join("");
             }
         }
 
     } catch (error) {
+        console.error("Wali dashboard error:", error);
+        showToast("Gagal memuat dashboard wali", true);
 
-        console.error(
-            "Wali dashboard error:",
-            error
-        );
-
-        showToast(
-            "Gagal memuat dashboard wali",
-            true
-        );
     } finally {
         hideLoader();
     }
+}
 
+function getStatusBadgeClass(status) {
+
+    switch ((status || "").toLowerCase()) {
+
+        case "day off":
+            return "bg-amber-100 text-amber-700";
+
+        case "izin":
+            return "bg-blue-100 text-blue-700";
+
+        case "sakit":
+            return "bg-red-100 text-red-700";
+
+        case "libur industri":
+            return "bg-purple-100 text-purple-700";
+
+        case "lupa absen":
+            return "bg-slate-200 text-slate-700";
+
+        default:
+            return "bg-slate-100 text-slate-700";
+    }
+}
+
+function getApprovalBadgeClass(approval) {
+    switch (String(approval || "").trim().toLowerCase()) {
+        case "approved":
+            return "bg-green-100 text-green-700";
+
+        case "rejected":
+            return "bg-red-100 text-red-700";
+
+        case "pending":
+            return "bg-amber-100 text-amber-700";
+
+        default:
+            return "bg-slate-100 text-slate-700";
+    }
+}
+
+function setApprovalMode(mode) {
+    AppState.approvalMode = mode;
+
+    const btnWali = document.getElementById("btn-approval-mode-wali");
+    const btnPembimbing = document.getElementById("btn-approval-mode-pembimbing");
+
+    btnWali?.classList.remove("bg-indigo-600", "text-white");
+    btnPembimbing?.classList.remove("bg-indigo-600", "text-white");
+
+    btnWali?.classList.add("bg-slate-100", "text-slate-700");
+    btnPembimbing?.classList.add("bg-slate-100", "text-slate-700");
+
+    if (mode === "wali") {
+        btnWali?.classList.remove("bg-slate-100", "text-slate-700");
+        btnWali?.classList.add("bg-indigo-600", "text-white");
+    } else {
+        btnPembimbing?.classList.remove("bg-slate-100", "text-slate-700");
+        btnPembimbing?.classList.add("bg-indigo-600", "text-white");
+    }
+
+    loadStatusApproval(true);
+}
+
+async function loadStatusApproval(useLoader = false) {
+    try {
+        const user = AppState.currentUser;
+        if (!user) return;
+
+        if (useLoader) {
+            showLoader("Memuat data approval...");
+        }
+
+        const data = await ApiService.call({
+            action: "get_status_pending",
+            mode: AppState.approvalMode,
+            username: user.username,
+            kategori: user.kategori
+        });
+
+        const list = document.getElementById("approval-list");
+        if (!list) return;
+
+        if (!data.length) {
+            list.innerHTML = `
+                <div class="bg-white rounded-2xl p-4 shadow text-center text-slate-500">
+                    Tidak ada pengajuan pending.
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = data.map(item => `
+            <div class="bg-white rounded-2xl p-4 shadow border border-slate-100">
+
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-slate-800">
+                            ${item.nama || "-"}
+                        </div>
+
+                        <div class="text-xs text-slate-500 mt-1">
+                            ${item.kategori || "-"} • ${item.tanggal || "-"}
+                        </div>
+                    </div>
+
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(item.status)}">
+                        ${item.status || "-"}
+                    </span>
+                </div>
+
+                ${
+                    item.keterangan
+                        ? `<div class="mt-3 text-sm text-slate-600 bg-slate-50 rounded-xl p-3">
+                            ${item.keterangan}
+                           </div>`
+                        : ""
+                }
+
+                <div class="mt-4 flex gap-2">
+                    <button onclick="updateApproval(${item.rowIndex}, 'Approved')"
+                        class="flex-1 bg-green-600 text-white py-2 rounded-xl text-sm font-semibold">
+                        Setujui
+                    </button>
+
+                    <button onclick="updateApproval(${item.rowIndex}, 'Rejected')"
+                        class="flex-1 bg-red-600 text-white py-2 rounded-xl text-sm font-semibold">
+                        Tolak
+                    </button>
+                </div>
+
+            </div>
+        `).join("");
+
+    } catch (error) {
+        console.error("Approval error:", error);
+        showToast("Gagal memuat approval", true);
+
+    } finally {
+        hideLoader();
+    }
+}
+
+async function updateApproval(rowIndex, approval) {
+    const user = AppState.currentUser;
+    if (!user) return;
+
+    const label = approval === "Approved" ? "menyetujui" : "menolak";
+
+    Swal.fire({
+        title: approval === "Approved" ? "Setujui Pengajuan?" : "Tolak Pengajuan?",
+        text: `Anda akan ${label} pengajuan ini.`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: approval === "Approved" ? "Ya, Setujui" : "Ya, Tolak",
+        cancelButtonText: "Batal",
+        confirmButtonColor: approval === "Approved" ? "#16a34a" : "#dc2626"
+    }).then(async result => {
+        if (!result.isConfirmed) return;
+
+        try {
+            showLoader("Memproses approval...");
+
+            const res = await ApiService.call({
+                action: "update_status_approval",
+                rowIndex,
+                approval,
+                approvedBy: user.username
+            });
+
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text: res.message || "Status berhasil diperbarui",
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            loadStatusApproval(false);
+
+        } catch (error) {
+            console.error(error);
+            showToast("Gagal memproses approval", true);
+
+        } finally {
+            hideLoader();
+        }
+    });
 }
 // ===============================
 // MODE SISWA
@@ -1020,5 +1337,76 @@ function initStudentHistoryFilter() {
 
     if (yearEl) {
         yearEl.value = now.getFullYear();
+    }
+}
+
+//KONFIRMASI KEHADIRAN
+function initStatusHarianForm() {
+    const tanggalEl = document.getElementById("status-tanggal");
+
+    if (tanggalEl) {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+
+        tanggalEl.value = `${yyyy}-${mm}-${dd}`;
+    }
+}
+
+async function submitStatusHarian() {
+    try {
+        const user = AppState.currentUser;
+        if (!user) return;
+
+        const tanggal = document.getElementById("status-tanggal")?.value;
+        const status = document.getElementById("status-tipe")?.value;
+        const keterangan = document.getElementById("status-keterangan")?.value;
+
+        if (!tanggal) {
+            showToast("Tanggal wajib diisi", true);
+            return;
+        }
+
+        if (!status) {
+            showToast("Pilih status terlebih dahulu", true);
+            return;
+        }
+
+        showLoader("Mengirim konfirmasi...");
+
+        const res = await ApiService.call({
+            action: "submit_status_harian",
+            tanggal,
+            username: user.username,
+            nama: user.nama,
+            kategori: user.kategori,
+            lokasiId: user.lokasiId,
+            status,
+            keterangan
+        });
+
+        if (res.status === "error") {
+            showToast(res.message, true);
+            return;
+        }
+
+        Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "Konfirmasi kehadiran berhasil dikirim.",
+            timer: 1600,
+            showConfirmButton: false
+        });
+
+        document.getElementById("status-tipe").value = "";
+        document.getElementById("status-keterangan").value = "";
+
+    } catch (error) {
+        console.error(error);
+        showToast("Gagal mengirim konfirmasi", true);
+
+    } finally {
+        hideLoader();
     }
 }
