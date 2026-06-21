@@ -125,6 +125,10 @@ function runPageLoader(pageId) {
             setMonitoringMode?.(AppState.monitoringMode || "wali");
             break;
 
+        case "page-wali-rekap":
+            initRekapBulananPage?.();
+            break;
+
         case "page-wali-history":
             setHistoryMode?.(AppState.historyMode || "wali");
             break;
@@ -200,6 +204,12 @@ function buildMenu(user) {
                 <span>Approval Status</span>
             </a>
 
+            <a href="#" onclick="navigateTo('page-wali-rekap')"
+                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <i class="fa-solid fa-table-list w-5"></i>
+                <span>Rekap Bulanan</span>
+            </a>
+
             <a href="#" data-page="page-wali-history" onclick="navigateTo('page-wali-history')"
                 class="sidebar-link">
                 <i class="fa-solid fa-clock-rotate-left w-5"></i>
@@ -214,6 +224,12 @@ function buildMenu(user) {
                 class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
                 <i class="fa-solid fa-school w-5"></i>
                 <span>Dashboard Kepsek</span>
+            </a>
+
+            <a href="#" onclick="navigateTo('page-wali-rekap')"
+                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <i class="fa-solid fa-table-list w-5"></i>
+                <span>Rekap Bulanan</span>
             </a>
         `;
     }
@@ -245,7 +261,8 @@ function setActiveNav(pageId) {
         "page-user-dashboard": 0,
         "page-user-absen": 1,
         "page-user-status": 2,
-        "page-history": 3
+        "page-user-status-history": 3,
+        "page-history": 4
     };
 
     const index = map[pageId];
@@ -315,6 +332,12 @@ function buildMobileBottomMenu(user) {
                 <span>Approval</span>
             </button>
 
+            <button onclick="navigateTo('page-wali-rekap')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-table-list text-lg"></i>
+                <span>Rekap</span>
+            </button>
+
             <button onclick="navigateTo('page-wali-history')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
 
@@ -335,6 +358,12 @@ function buildMobileBottomMenu(user) {
 
                 <i class="fa-solid fa-school text-lg"></i>
                 <span>Kepsek</span>
+            </button>
+
+            <button onclick="navigateTo('page-wali-rekap')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-table-list text-lg"></i>
+                <span>Rekap</span>
             </button>
         `;
     }

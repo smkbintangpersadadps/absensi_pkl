@@ -1170,3 +1170,123 @@ button:disabled {
     font-size: 14px;
     letter-spacing: 1px;
 }
+
+/*REKAP BADGE*/
+.rekap-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    height: 26px;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.rekap-mp {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.rekap-m {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.rekap-p {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.rekap-dayoff {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.rekap-izin {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.rekap-sakit {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.rekap-libur {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+.rekap-lupa {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.rekap-pending {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.rekap-kosong {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+
+.history-status-special {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    min-height: 110px; /* sesuaikan dengan tinggi history-action */
+
+    text-align: center;
+}
+
+.history-status-special .fa-calendar-check {
+    font-size: 13px;
+}
+
+/* STYLE BOTTOM NAV */
+
+.bottom-nav {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    min-width: 68px;
+
+    color: #64748b;
+
+    transition: all .25s ease;
+}
+
+.bottom-nav i {
+    font-size: 20px;
+    transition: all .25s ease;
+}
+
+.bottom-nav span {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.bottom-nav.active {
+    color: #4f46e5;
+}
+
+.bottom-nav.active i {
+    transform: translateY(-2px);
+}

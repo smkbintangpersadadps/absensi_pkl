@@ -5,7 +5,6 @@
 // async function loadHistory() {
 //     try {
 //         const user = AppState.currentUser;
-
 //         if (!user) return;
 
 //         const data = await ApiService.call({
@@ -16,6 +15,14 @@
 
 //         AppState.riwayat = data;
 
+//         const role = String(user.role || "").trim().toLowerCase();
+
+//         if (role === "siswa" || role === "peserta") {
+//             initStudentHistoryFilter();
+//             renderStudentHistoryCards(data);
+//             return;
+//         }
+
 //         renderHistoryTable(data);
 
 //     } catch (error) {
@@ -23,10 +30,13 @@
 //         showToast("Gagal memuat riwayat", true);
 //     }
 // }
+
 async function loadHistory() {
     try {
         const user = AppState.currentUser;
         if (!user) return;
+
+        const role = String(user.role || "").trim().toLowerCase();
 
         const data = await ApiService.call({
             action: "get_riwayat",
@@ -36,11 +46,23 @@ async function loadHistory() {
 
         AppState.riwayat = data;
 
-        const role = String(user.role || "").trim().toLowerCase();
-
         if (role === "siswa" || role === "peserta") {
             initStudentHistoryFilter();
-            renderStudentHistoryCards(data);
+
+            const monthEl = document.getElementById("student-history-month");
+            const yearEl = document.getElementById("student-history-year");
+
+            const bulan = Number(monthEl?.value || (new Date().getMonth() + 1));
+            const tahun = Number(yearEl?.value || new Date().getFullYear());
+
+            const statusData = await ApiService.call({
+                action: "get_status_history_month",
+                username: user.username,
+                bulan,
+                tahun
+            });
+
+            renderStudentHistoryCards(data, statusData);
             return;
         }
 
@@ -388,6 +410,176 @@ async function loadStatusHistory(useLoader = false) {
     } finally {
         hideLoader();
     }
+}
+
+//RIWAYAT SISWA
+function renderStudentHistoryCards(riwayat, statusData = []) {
+    const container = document.getElementById("student-history-list");
+    if (!container) return;
+
+    const monthEl = document.getElementById("student-history-month");
+    const yearEl = document.getElementById("student-history-year");
+
+    const selectedMonth = Number(monthEl?.value || (new Date().getMonth() + 1));
+    const selectedYear = Number(yearEl?.value || new Date().getFullYear());
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    let jumlahHari = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    if (selectedMonth === currentMonth && selectedYear === currentYear) {
+        jumlahHari = now.getDate();
+    }
+
+    // ===============================
+    // GROUP ABSENSI
+    // ===============================
+    const grouped = {};
+
+    (riwayat || []).forEach(r => {
+        const tanggalText = r.timestamp?.split(" ")[0];
+        if (!tanggalText) return;
+
+        const [day, month, year] = tanggalText.split("/").map(Number);
+
+        if (month !== selectedMonth || year !== selectedYear) return;
+
+        if (!grouped[day]) {
+            grouped[day] = {
+                masuk: null,
+                pulang: null
+            };
+        }
+
+        if (r.tipe === "Masuk") grouped[day].masuk = r;
+        if (r.tipe === "Pulang") grouped[day].pulang = r;
+    });
+
+    // ===============================
+    // GROUP STATUS HARIAN
+    // ===============================
+    const statusMap = {};
+
+    (statusData || []).forEach(s => {
+        if (!s.tanggal) return;
+
+        const [day, month, year] = s.tanggal.split("/").map(Number);
+
+        if (month !== selectedMonth || year !== selectedYear) return;
+
+        statusMap[day] = s;
+    });
+
+    let html = "";
+
+    for (let day = jumlahHari; day >= 1; day--) {
+        const masuk = grouped[day]?.masuk;
+        const pulang = grouped[day]?.pulang;
+        const statusHari = statusMap[day];
+
+        const hasStatus =
+            statusHari &&
+            String(statusHari.approval || "").trim().toLowerCase() !== "rejected";
+
+        html += `
+            <div class="history-card">
+
+                <div class="history-date">
+
+                    <div class="history-weekday">
+                        ${getDayName(day, selectedMonth, selectedYear)}
+                    </div>
+
+                    <div class="day">${day}</div>
+
+                    <div class="month">
+                        ${getMonthShort(selectedMonth)} ${selectedYear}
+                    </div>
+
+                </div>
+
+                ${
+                    hasStatus && !masuk && !pulang
+                        ? renderStatusHistoryBlock(statusHari)
+                        : renderNormalHistoryBlock(masuk, pulang)
+                }
+
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+function renderNormalHistoryBlock(masuk, pulang) {
+    return `
+        <div class="history-action">
+            <div class="history-badge in">Scan In</div>
+
+            <div class="history-time">
+                ${masuk ? masuk.timestamp.split(" ")[1] : "00:00:00"}
+            </div>
+
+            <div class="history-note">
+                ${masuk ? `${Math.round(masuk.jarak || 0)} meter` : "Belum absen"}
+            </div>
+        </div>
+
+        <div class="history-action">
+            <div class="history-badge out">Scan Out</div>
+
+            <div class="history-time">
+                ${pulang ? pulang.timestamp.split(" ")[1] : "00:00:00"}
+            </div>
+
+            <div class="history-note">
+                ${pulang ? `${Math.round(pulang.jarak || 0)} meter` : "Belum absen"}
+            </div>
+        </div>
+    `;
+}
+
+function renderStatusHistoryBlock(statusHari) {
+    const approval = String(statusHari.approval || "Pending").trim();
+
+    return `
+        <div class="history-status-special">
+
+           <div class="flex items-center justify-center gap-2 flex-wrap">
+
+    <span class="inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClass(statusHari.status)}">
+        <i class="fa-solid fa-calendar-check"></i>
+        ${statusHari.status || "-"}
+    </span>
+
+    <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getApprovalBadgeClass(approval)}">
+        ${approval}
+    </span>
+
+</div>
+
+            ${
+                statusHari.keterangan
+                    ? `<div class="mt-2 text-xs text-slate-500 italic">
+                        ${statusHari.keterangan}
+                       </div>`
+                    : ""
+            }
+
+        </div>
+
+        <div class="history-action">
+            <div class="history-badge out">Status</div>
+
+            
+
+            <div class="history-note">
+                Tidak perlu absen
+            </div>
+        </div>
+    `;
 }
 
 

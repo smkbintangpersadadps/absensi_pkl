@@ -1211,96 +1211,96 @@ function getAttendanceProgress(totalHadir) {
 }
 
 //Riwayat Absen Bentuk CARD
-function renderStudentHistoryCards(riwayat) {
-    const container = document.getElementById("student-history-list");
-    if (!container) return;
+// function renderStudentHistoryCards(riwayat) {
+//     const container = document.getElementById("student-history-list");
+//     if (!container) return;
 
-    const monthEl = document.getElementById("student-history-month");
-    const yearEl = document.getElementById("student-history-year");
+//     const monthEl = document.getElementById("student-history-month");
+//     const yearEl = document.getElementById("student-history-year");
 
-    const selectedMonth = Number(monthEl?.value || (new Date().getMonth() + 1));
-    const selectedYear = Number(yearEl?.value || new Date().getFullYear());
+//     const selectedMonth = Number(monthEl?.value || (new Date().getMonth() + 1));
+//     const selectedYear = Number(yearEl?.value || new Date().getFullYear());
 
-    const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
+//     const now = new Date();
+//     const currentMonth = now.getMonth() + 1;
+//     const currentYear = now.getFullYear();
 
-    let jumlahHari = new Date(selectedYear, selectedMonth, 0).getDate();
+//     let jumlahHari = new Date(selectedYear, selectedMonth, 0).getDate();
 
-    if (selectedMonth === currentMonth && selectedYear === currentYear) {
-        jumlahHari = now.getDate();
-    }
+//     if (selectedMonth === currentMonth && selectedYear === currentYear) {
+//         jumlahHari = now.getDate();
+//     }
 
-    const grouped = {};
+//     const grouped = {};
 
-    (riwayat || []).forEach(r => {
-        const tanggalText = r.timestamp?.split(" ")[0];
-        if (!tanggalText) return;
+//     (riwayat || []).forEach(r => {
+//         const tanggalText = r.timestamp?.split(" ")[0];
+//         if (!tanggalText) return;
 
-        const [day, month, year] = tanggalText.split("/").map(Number);
+//         const [day, month, year] = tanggalText.split("/").map(Number);
 
-        if (month !== selectedMonth || year !== selectedYear) return;
+//         if (month !== selectedMonth || year !== selectedYear) return;
 
-        if (!grouped[day]) {
-            grouped[day] = {
-                masuk: null,
-                pulang: null
-            };
-        }
+//         if (!grouped[day]) {
+//             grouped[day] = {
+//                 masuk: null,
+//                 pulang: null
+//             };
+//         }
 
-        if (r.tipe === "Masuk") grouped[day].masuk = r;
-        if (r.tipe === "Pulang") grouped[day].pulang = r;
-    });
+//         if (r.tipe === "Masuk") grouped[day].masuk = r;
+//         if (r.tipe === "Pulang") grouped[day].pulang = r;
+//     });
 
-    let html = "";
+//     let html = "";
 
-    for (let day = jumlahHari; day >= 1; day--) {
-        const masuk = grouped[day]?.masuk;
-        const pulang = grouped[day]?.pulang;
+//     for (let day = jumlahHari; day >= 1; day--) {
+//         const masuk = grouped[day]?.masuk;
+//         const pulang = grouped[day]?.pulang;
 
-        html += `
-            <div class="history-card">
-                <div class="history-date">
-                    <div class="history-weekday">
-                        ${getDayName(day, selectedMonth, selectedYear)}
-                    </div>
-                    <div class="day">
-                        ${day}
-                    </div>
-                    <div class="month">
-                        ${getMonthShort(selectedMonth)} ${selectedYear}
-                    </div>
-                </div>
+//         html += `
+//             <div class="history-card">
+//                 <div class="history-date">
+//                     <div class="history-weekday">
+//                         ${getDayName(day, selectedMonth, selectedYear)}
+//                     </div>
+//                     <div class="day">
+//                         ${day}
+//                     </div>
+//                     <div class="month">
+//                         ${getMonthShort(selectedMonth)} ${selectedYear}
+//                     </div>
+//                 </div>
 
-                <div class="history-action">
-                    <div class="history-badge in">Scan In</div>
-                    <div class="history-time">
-                        ${masuk ? masuk.timestamp.split(" ")[1] : "00:00:00"}
-                    </div>
-                    <div class="history-note">
-                        ${masuk ? `${Math.round(masuk.jarak || 0)} meter` : "Belum absen"}
-                    </div>
-                </div>
+//                 <div class="history-action">
+//                     <div class="history-badge in">Scan In</div>
+//                     <div class="history-time">
+//                         ${masuk ? masuk.timestamp.split(" ")[1] : "00:00:00"}
+//                     </div>
+//                     <div class="history-note">
+//                         ${masuk ? `${Math.round(masuk.jarak || 0)} meter` : "Belum absen"}
+//                     </div>
+//                 </div>
 
-                <div class="history-action">
-                    <div class="history-badge out">
-                        Scan Out
-                    </div>
-                    <div class="history-time">
-                        ${pulang ? pulang.timestamp.split(" ")[1] : "00:00:00"}
-                    </div>
-                    <div class="history-note">
-                        ${pulang
-                            ? `${Math.round(pulang.jarak || 0)} meter`
-                            : "Belum absen"}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
+//                 <div class="history-action">
+//                     <div class="history-badge out">
+//                         Scan Out
+//                     </div>
+//                     <div class="history-time">
+//                         ${pulang ? pulang.timestamp.split(" ")[1] : "00:00:00"}
+//                     </div>
+//                     <div class="history-note">
+//                         ${pulang
+//                             ? `${Math.round(pulang.jarak || 0)} meter`
+//                             : "Belum absen"}
+//                     </div>
+//                 </div>
+//             </div>
+//         `;
+//     }
 
-    container.innerHTML = html;
-}
+//     container.innerHTML = html;
+// }
 
 function getDayName(day, month, year) {
     const days = [

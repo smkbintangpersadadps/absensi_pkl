@@ -545,6 +545,92 @@
 
             </section>
 
+            <!--REKAP SECTION-->
+            <section id="page-wali-rekap" class="hidden-page p-4 space-y-4">
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h2 class="text-lg font-bold text-slate-800">
+                        Rekap Absensi Bulanan
+                    </h2>
+                    <p class="text-sm text-slate-500">
+                        Rekap kehadiran siswa termasuk Day Off, Izin, Sakit, dan Pending Approval.
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow grid md:grid-cols-5 gap-3">
+                    <div>
+                        <label class="text-sm text-slate-500">Mode</label>
+                        <select id="rekap-mode" class="w-full border rounded-xl p-3">
+                            <option value="wali">Wali Kelas</option>
+                            <option value="pembimbing">Pembimbing PKL</option>
+                        </select>
+                    </div>
+                    <div id="rekap-kategori-wrapper" class="hidden">
+                        <label class="text-sm text-slate-500">Kategori / Kelas</label>
+                        <select id="rekap-kategori"
+                            onchange="loadRekapBulanan()"
+                            class="w-full border rounded-xl p-3">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-500">Bulan</label>
+                        <select id="rekap-bulan" class="w-full border rounded-xl p-3">
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-500">Tahun</label>
+                        <input id="rekap-tahun"
+                            type="number"
+                            class="w-full border rounded-xl p-3">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="loadRekapBulanan(true)"
+                            class="w-full bg-indigo-600 text-white p-3 rounded-xl font-semibold">
+                            Tampilkan
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow">
+                    <h3 class="font-bold text-slate-800 mb-3">
+                        Keterangan
+                    </h3>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="px-2 py-1 rounded-full bg-green-100 text-green-700">MP = Masuk & Pulang</span>
+                        <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700">M = Masuk</span>
+                        <span class="px-2 py-1 rounded-full bg-sky-100 text-sky-700">P = Pulang</span>
+                        <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700">D = Day Off</span>
+                        <span class="px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">I = Izin</span>
+                        <span class="px-2 py-1 rounded-full bg-red-100 text-red-700">S = Sakit</span>
+                        <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-700">L = Libur Industri</span>
+                        <span class="px-2 py-1 rounded-full bg-slate-200 text-slate-700">LA = Lupa Absen</span>
+                        <span class="px-2 py-1 rounded-full bg-orange-100 text-orange-700">PD = Pending</span>
+                        <span class="px-2 py-1 rounded-full bg-slate-100 text-slate-500">- = Belum Konfirmasi</span>
+                    </div>
+                </div>
+                <div id="rekap-empty"
+                    class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-700">
+                </div>
+                <div id="rekap-table-wrapper" class="bg-white rounded-2xl p-4 shadow">
+                    <div class="overflow-x-auto">
+                        <table id="rekap-table" class="w-full text-sm display">
+                            <thead id="rekap-head"></thead>
+                            <tbody id="rekap-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!--APPROVAL-->
             <section id="page-wali-approval" class="hidden-page p-4 space-y-4">
                 <div class="bg-white rounded-2xl p-4 shadow">
                     <h2 class="text-lg font-bold text-slate-800">
@@ -1022,7 +1108,7 @@
                 </p>
 
                 <p class="text-slate-500">
-                    SMK Bintang Persada Denpasar • Versi 1.1
+                    SMK Bintang Persada Denpasar • Versi 1.5
                 </p>
             </div>
         </footer>
@@ -1059,6 +1145,7 @@
 
     <script src="js/auth.js"></script>
     <script src="js/navigation.js"></script>
+    <script src="js/rekap.js"></script>
     <script src="js/history.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/admin.js"></script>
