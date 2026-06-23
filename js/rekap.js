@@ -151,7 +151,13 @@ function renderRekapBulanan(data) {
     let tanggalHeader = "";
 
     for (let i = 1; i <= jumlahHari; i++) {
-        tanggalHeader += `<th class="text-center">${i}</th>`;
+        tanggalHeader += `
+            <th class="rekap-day-col">
+                <div class="rekap-day-title">
+                    ${i}
+                </div>
+            </th>
+        `;
     }
 
     head.innerHTML = `
@@ -180,8 +186,13 @@ function renderRekapBulanan(data) {
 
         return `
             <tr>
-                <td class="font-medium whitespace-nowrap">${r.nama || "-"}</td>
-                <td class="whitespace-nowrap">${r.kategori || "-"}</td>
+                <td style="min-width:220px" class="font-medium whitespace-nowrap">
+                    ${r.nama || "-"}
+                </td>
+
+                <td style="min-width:140px" class="whitespace-nowrap">
+                    ${r.kategori || "-"}
+                </td>
 
                 ${hariCells}
 
@@ -201,10 +212,17 @@ function renderRekapBulanan(data) {
         ordering: true,
         searching: true,
         scrollX: true,
-        autoWidth: false,
+        autoWidth: true,
         columnDefs: [
-                        { width: "220px", targets: 0 }
-                    ],
+    {
+        targets: [0,1],
+        orderable: true
+    },
+    {
+        targets: "_all",
+        orderable: false
+    }
+],
 
         destroy: true,
         language: {

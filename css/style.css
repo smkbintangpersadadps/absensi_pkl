@@ -1180,7 +1180,7 @@ button:disabled {
     min-width: 28px;
     height: 26px;
 
-    padding: 0 6px;
+    padding: 4px 2px;
 
     border-radius: 999px;
 
@@ -1237,6 +1237,30 @@ button:disabled {
     background: #f1f5f9;
     color: #94a3b8;
 }
+
+.rekap-day-col,
+.rekap-day-cell {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+    padding: 4px 2px !important;
+    
+}
+.rekap-day-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#rekap-table td {
+    white-space: nowrap;
+}
+/* #rekap-table th,
+#rekap-table td {
+    border: 1px solid red !important;
+} */
+
 
 .history-status-special {
     display: flex;
