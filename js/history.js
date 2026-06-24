@@ -391,6 +391,21 @@ async function loadStatusHistory(useLoader = false) {
                     </span>
                 </div>
 
+                ${
+                    item.approval === "Pending"
+                        ? `
+                            <button
+                                onclick="cancelStatusRequest('${item.id}')"
+                                class="mt-3 w-full px-3 py-2 rounded-xl border border-red-200 bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition">
+
+                                <i class="fa-solid fa-xmark mr-1"></i>
+                                Batalkan Pengajuan
+
+                            </button>
+                        `
+                        : ""
+                }
+
                 ${item.approvedByNama
                 ? `<div class="mt-2 text-[11px] text-slate-400">
                     Diproses oleh :
@@ -580,6 +595,78 @@ function renderStatusHistoryBlock(statusHari) {
             </div>
         </div>
     `;
+}
+
+//CANCEL APPROVE
+async function cancelStatusRequest(id) {
+
+    const result = await Swal.fire({
+        title: "Batalkan Pengajuan?",
+        html: `
+            <div class="text-sm text-slate-600">
+                Pengajuan ini masih berstatus
+                <b>Pending Approval</b>.
+                <br><br>
+                Apakah Anda yakin ingin membatalkannya?
+            </div>
+        `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Batalkan",
+        cancelButtonText: "Kembali",
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#64748b"
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+
+        showLoader("Membatalkan pengajuan...");
+
+        const user = AppState.currentUser;
+
+        const response = await ApiService.call({
+            action: "cancel_status_harian",
+            id,
+            username: user.username
+        });
+
+        if (response.success) {
+
+            await Swal.fire({
+                title: "Berhasil",
+                text: response.message || "Pengajuan berhasil dibatalkan.",
+                icon: "success",
+                timer: 1800,
+                showConfirmButton: false
+            });
+
+            loadStatusHistory();
+
+        } else {
+
+            Swal.fire({
+                title: "Gagal",
+                text: response.message || "Pengajuan tidak dapat dibatalkan.",
+                icon: "error"
+            });
+        }
+
+    } catch (error) {
+
+        console.error("Cancel status error:", error);
+
+        Swal.fire({
+            title: "Terjadi Kesalahan",
+            text: "Gagal membatalkan pengajuan.",
+            icon: "error"
+        });
+
+    } finally {
+
+        hideLoader();
+    }
 }
 
 

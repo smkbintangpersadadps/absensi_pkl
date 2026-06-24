@@ -653,11 +653,14 @@ async function loadWaliDashboard(useLoader = false) {
                         }
 
                         ${
-                            s.approvalStatus
+                            approvalStatus === "Pending"
                                 ? `
-                                    <div class="mt-2 inline-flex px-2 py-1 rounded-full text-[11px] font-semibold ${getApprovalBadgeClass(s.approvalStatus)}">
-                                        ${s.approvalStatus}
-                                    </div>
+                                    <button
+                                        onclick="cancelStatusRequest('${item.id}')"
+                                        class="mt-3 w-full px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 text-sm">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        Batalkan Pengajuan
+                                    </button>
                                 `
                                 : ""
                         }
