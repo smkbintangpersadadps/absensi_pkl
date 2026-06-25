@@ -983,10 +983,41 @@
                     Mulai Absensi
                 </h1>
 
-                <select id="absen-tipe" class="input-field">
+                <!-- <select id="absen-tipe" class="input-field">
                     <option value="Masuk">Masuk</option>
                     <option value="Pulang">Pulang</option>
-                </select>
+                </select> -->
+                <div class="absen-toggle">
+
+                    <button
+                        type="button"
+                        class="absen-btn active-masuk"
+                        data-value="Masuk">
+
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        Masuk
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="absen-btn"
+                        data-value="Pulang">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Pulang
+
+                    </button>
+
+                </div>
+
+                <input
+                    type="hidden"
+                    id="absen-tipe"
+                    value="Masuk">
+                <br>
+
+                <input type="hidden" id="absen-tipe" value="Masuk">
 
                 <!-- <video id="kamera-video"
                     autoplay

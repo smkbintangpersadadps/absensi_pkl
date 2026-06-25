@@ -212,6 +212,33 @@ function resetAbsensi() {
     document.getElementById("gps-distance").innerText = "";
 }
 
+const buttons = document.querySelectorAll(".absen-btn");
+
+buttons.forEach(btn => {
+
+    btn.addEventListener("click", () => {
+
+        buttons.forEach(b => {
+            b.classList.remove(
+                "active-masuk",
+                "active-pulang"
+            );
+        });
+
+        const value = btn.dataset.value;
+
+        if (value === "Masuk") {
+            btn.classList.add("active-masuk");
+        } else {
+            btn.classList.add("active-pulang");
+        }
+
+        document.getElementById("absen-tipe").value =
+            value;
+    });
+
+});
+
 async function submitAbsensi() {
     const user = AppState.currentUser;
 
