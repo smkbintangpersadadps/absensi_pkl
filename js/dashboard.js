@@ -5,8 +5,59 @@ let kepsekMap = null;
 let kepsekMarkers = [];
 let kepsekLokasiSelect = null;
 
+// async function loadKepsekDashboard(useLoader = false) {
+//     try {
+//         const user = AppState.currentUser;
+//         if (!user) return;
+
+//         if (useLoader) {
+//             showLoader("Memuat dashboard kepala sekolah...");
+//         }
+
+//         const lokasiId =
+//             document.getElementById("kepsek-filter-lokasi")?.value || "ALL";
+
+//         const tanggalEl = document.getElementById("kepsek-filter-tanggal");
+
+//         if (tanggalEl && !tanggalEl.value) {
+//             const now = new Date();
+
+//             tanggalEl.value =
+//                 now.getFullYear() + "-" +
+//                 String(now.getMonth() + 1).padStart(2, "0") + "-" +
+//                 String(now.getDate()).padStart(2, "0");
+//         }
+
+//         const tanggal = tanggalEl?.value || "";
+
+//         const data = await ApiService.call({
+//             action: "get_kepsek_dashboard",
+//             lokasiId,
+//             tanggal
+//         });
+
+//         const summary = data.summary || {};
+//         const lokasiList = data.lokasiList || [];
+//         const siswa = data.siswa || [];
+//         const rekapIndustri = data.rekapIndustri || [];
+
+//         renderKepsekFilter(lokasiList, lokasiId);
+//         renderKepsekSummary(summary);
+//         renderKepsekRekapIndustri(rekapIndustri, lokasiId);
+//         renderKepsekTable(siswa);
+//         renderKepsekMap(rekapIndustri, lokasiId);
+
+//     } catch (error) {
+//         console.error("Kepsek dashboard error:", error);
+//         showToast("Gagal memuat dashboard kepala sekolah", true);
+
+//     } finally {
+//         hideLoader();
+//     }
+// }
 async function loadKepsekDashboard(useLoader = false) {
     try {
+
         const user = AppState.currentUser;
         if (!user) return;
 
@@ -14,21 +65,38 @@ async function loadKepsekDashboard(useLoader = false) {
             showLoader("Memuat dashboard kepala sekolah...");
         }
 
+        // ===============================
+        // FILTER
+        // ===============================
+
         const lokasiId =
             document.getElementById("kepsek-filter-lokasi")?.value || "ALL";
 
-        const tanggalEl = document.getElementById("kepsek-filter-tanggal");
+        const tanggalEl =
+            document.getElementById("kepsek-filter-tanggal");
 
         if (tanggalEl && !tanggalEl.value) {
+
             const now = new Date();
 
             tanggalEl.value =
                 now.getFullYear() + "-" +
                 String(now.getMonth() + 1).padStart(2, "0") + "-" +
                 String(now.getDate()).padStart(2, "0");
+
         }
 
         const tanggal = tanggalEl?.value || "";
+
+        console.log("=== REQUEST ===");
+        console.log({
+            lokasiId,
+            tanggal
+        });
+
+        // ===============================
+        // API
+        // ===============================
 
         const data = await ApiService.call({
             action: "get_kepsek_dashboard",
@@ -36,23 +104,99 @@ async function loadKepsekDashboard(useLoader = false) {
             tanggal
         });
 
-        const summary = data.summary || {};
-        const lokasiList = data.lokasiList || [];
-        const siswa = data.siswa || [];
-        const rekapIndustri = data.rekapIndustri || [];
+        console.log("=== RESPONSE GAS ===");
+        console.log(data);
 
-        renderKepsekFilter(lokasiList, lokasiId);
-        renderKepsekSummary(summary);
-        renderKepsekRekapIndustri(rekapIndustri, lokasiId);
-        renderKepsekTable(siswa);
-        renderKepsekMap(rekapIndustri, lokasiId);
+        if (!data) {
+            throw new Error("Response GAS kosong");
+        }
 
-    } catch (error) {
-        console.error("Kepsek dashboard error:", error);
-        showToast("Gagal memuat dashboard kepala sekolah", true);
+        // ===============================
+        // VALIDASI
+        // ===============================
 
-    } finally {
+        if (!data.summary) {
+            console.error("summary kosong", data);
+        }
+
+        if (!Array.isArray(data.lokasiList)) {
+            console.error("lokasiList bukan array", data.lokasiList);
+        }
+
+        if (!Array.isArray(data.siswa)) {
+            console.error("siswa bukan array", data.siswa);
+        }
+
+        if (!Array.isArray(data.rekapIndustri)) {
+            console.error("rekapIndustri bukan array", data.rekapIndustri);
+        }
+
+        const summary =
+            data.summary || {};
+
+        const lokasiList =
+            data.lokasiList || [];
+
+        const siswa =
+            data.siswa || [];
+
+        const rekapIndustri =
+            data.rekapIndustri || [];
+
+        console.log("Summary :", summary);
+        console.log("Lokasi :", lokasiList.length);
+        console.log("Siswa :", siswa.length);
+        console.log("Rekap :", rekapIndustri.length);
+
+        // ===============================
+        // RENDER
+        // ===============================
+
+        renderKepsekFilter(
+            lokasiList,
+            lokasiId
+        );
+
+        renderKepsekSummary(
+            summary
+        );
+
+        renderKepsekRekapIndustri(
+            rekapIndustri,
+            lokasiId
+        );
+
+        renderKepsekTable(
+            siswa
+        );
+
+        renderKepsekMap(
+            rekapIndustri,
+            lokasiId
+        );
+
+        console.log("Dashboard Kepsek berhasil dirender.");
+
+    }
+    catch (error) {
+
+        console.error("=== ERROR DASHBOARD KEPSEK ===");
+        console.error(error);
+
+        if (error.stack) {
+            console.error(error.stack);
+        }
+
+        showToast(
+            error.message || "Gagal memuat dashboard kepala sekolah",
+            true
+        );
+
+    }
+    finally {
+
         hideLoader();
+
     }
 }
 
@@ -1154,326 +1298,152 @@ function pilihModeSiswaOrtu() {
 // }
 
 async function loadUserDashboardStats() {
+
     try {
 
         const user = AppState.currentUser;
+
         if (!user) return;
 
         if (!AppState.currentUserLocation && user.lokasiId) {
             await loadUserLocation();
         }
 
-        const riwayat = await ApiService.call({
-            action: "get_riwayat",
-            role: user.role,
+        const dashboard = await ApiService.call({
+            action: "get_dashboard_siswa",
             username: user.username
         });
 
-        // ===============================
-        // REQUIRED UI CHECK
-        // ===============================
+        const hariIni = dashboard.hariIni || {};
+        const ringkasan = dashboard.ringkasan || {};
+        const last = dashboard.lastAbsen || null;
 
-        const requiredUI = [
-            "ui-status-hari",
-            "ui-masuk",
-            "ui-pulang",
-            "ui-total-hadir",
-            "ui-total-masuk",
-            "ui-total-pulang",
-            "ui-progress-kehadiran",
-            "ui-persentase",
-            "ui-last-absen"
-        ];
-
-        const missing = requiredUI.filter(id =>
-            !document.getElementById(id)
-        );
-
-        if (missing.length > 0) {
-            console.warn("Dashboard UI missing:", missing);
-            return;
-        }
-
-        // ===============================
-        // SAFE DOM
-        // ===============================
-
-        const setText = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.innerText = value;
+        const setText = (id,val)=>{
+            const el=document.getElementById(id);
+            if(el) el.innerText=val;
         };
 
-        const setHTML = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.innerHTML = value;
+        const setHTML=(id,val)=>{
+            const el=document.getElementById(id);
+            if(el) el.innerHTML=val;
         };
 
-        const setWidth = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.style.width = value;
+        const setWidth=(id,val)=>{
+            const el=document.getElementById(id);
+            if(el) el.style.width=val;
         };
 
-        // ===============================
-        // VALIDASI
-        // ===============================
-
-        if (!Array.isArray(riwayat)) {
-            console.warn("Riwayat bukan array:", riwayat);
-            return;
-        }
-
-        // ===============================
-        // HARI INI
-        // ===============================
-
-        const today = new Date();
-
-        const todayStr =
-            String(today.getDate()).padStart(2, "0") + "/" +
-            String(today.getMonth() + 1).padStart(2, "0") + "/" +
-            today.getFullYear();
-
-        // ===============================
-        // FILTER HARI INI
-        // ===============================
-
-        const todayData = riwayat.filter(r =>
-            r.tanggal === todayStr
-        );
-
-        // ===============================
-        // FILTER BULAN INI
-        // ===============================
-
-        const thisMonth = riwayat.filter(r => {
-
-            if (!r.tanggal) return false;
-
-            const d = parseDateID(r.tanggal);
-
-            return (
-                d &&
-                d.getMonth() === today.getMonth() &&
-                d.getFullYear() === today.getFullYear()
-            );
-
-        });
-
-        // ===============================
+        // ======================
         // STATUS HARI INI
-        // ===============================
+        // ======================
 
-        const masukToday =
-            todayData.find(r => r.tipe === "Masuk");
+        setText("ui-status-hari",hariIni.status||"Belum Absen");
+        setText("ui-masuk",hariIni.masuk||"-");
+        setText("ui-pulang",hariIni.pulang||"-");
 
-        const pulangToday =
-            todayData.find(r => r.tipe === "Pulang");
+        // ======================
+        // USER
+        // ======================
 
-        const statusHari =
-            todayData.length
-                ? "Hadir"
-                : "Belum Absen";
+        setText("ui-user-name",user.nama);
+        setText("ui-user-kategori",user.kategori||"-");
 
-        // ===============================
-        // RINGKASAN BULAN
-        // ===============================
+        // ======================
+        // RINGKASAN
+        // ======================
 
-        const totalHadir = new Set(
-
-            thisMonth
-                .filter(r => r.tipe === "Masuk")
-                .map(r => r.tanggal)
-
-        ).size;
-
-        const totalMasuk =
-            thisMonth.filter(r =>
-                r.tipe === "Masuk"
-            ).length;
-
-        const totalPulang =
-            thisMonth.filter(r =>
-                r.tipe === "Pulang"
-            ).length;
-
-        // ===============================
-        // TARGET HADIR
-        // ===============================
-
-        const targetHari = 22;
-
-        const progress =
-            targetHari > 0
-                ? Math.min(
-                    (totalHadir / targetHari) * 100,
-                    100
-                )
-                : 0;
-
-        // ===============================
-        // LAST ABSEN
-        // ===============================
-
-        const last = riwayat.length
-            ? riwayat[0]
-            : null;
-
-        // ===============================
-        // UPDATE UI
-        // ===============================
-
-        setText(
-            "ui-status-hari",
-            statusHari
-        );
-
-        setText(
-            "ui-masuk",
-            masukToday?.jam || "-"
-        );
-
-        setText(
-            "ui-pulang",
-            pulangToday?.jam || "-"
-        );
-
-        setText(
-            "ui-user-name",
-            user.nama
-        );
-
-        setText(
-            "ui-user-kategori",
-            user.kategori || "-"
-        );
-
-        setText(
-            "ui-total-hadir",
-            totalHadir
-        );
-
-        setText(
-            "ui-total-masuk",
-            totalMasuk
-        );
-
-        setText(
-            "ui-total-pulang",
-            totalPulang
-        );
+        setText("ui-total-hadir",ringkasan.totalHadir||0);
+        setText("ui-total-masuk",ringkasan.totalMasuk||0);
+        setText("ui-total-pulang",ringkasan.totalPulang||0);
 
         setWidth(
             "ui-progress-kehadiran",
-            `${progress}%`
+            `${ringkasan.progress||0}%`
         );
 
         setText(
             "ui-persentase",
-            `${Math.round(progress)}%`
+            `${ringkasan.progress||0}%`
         );
 
-        // ===============================
-        // LOKASI PKL
-        // ===============================
+        // ======================
+        // LOKASI
+        // ======================
 
-        const lokasiEl =
-            document.getElementById("ui-user-lokasi");
+        const lokasiEl=document.getElementById("ui-user-lokasi");
 
-        if (lokasiEl && AppState.currentUserLocation) {
+        if(lokasiEl && AppState.currentUserLocation){
 
-            const lokasi =
-                AppState.currentUserLocation;
+            const lokasi=AppState.currentUserLocation;
 
-            lokasiEl.innerHTML = `
+            lokasiEl.innerHTML=`
                 <i class="fa-solid fa-location-dot"></i>
-                ${lokasi.namaIndustri || "Lokasi PKL"}
+                ${lokasi.namaIndustri}
             `;
 
-            lokasiEl.href =
-                `https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`;
-
-            lokasiEl.target = "_blank";
-
-        } else if (lokasiEl) {
-
-            lokasiEl.innerText = "Belum diatur";
-            lokasiEl.removeAttribute("href");
+            lokasiEl.href=`https://www.google.com/maps?q=${lokasi.lat},${lokasi.lng}`;
+            lokasiEl.target="_blank";
 
         }
 
-        // ===============================
+        // ======================
         // PEMBIMBING
-        // ===============================
+        // ======================
 
-        setText(
-            "ui-user-pembina",
-            user.pembimbingNama || "-"
-        );
+        setText("ui-user-pembina",user.pembimbingNama||"-");
 
-        const waEl =
-            document.getElementById("ui-user-wa-pembina");
+        const waEl=document.getElementById("ui-user-wa-pembina");
 
-        if (waEl && user.pembimbingWa) {
+        if(waEl && user.pembimbingWa){
 
-            let wa = String(user.pembimbingWa)
-                .replace(/\D/g, "");
+            let wa=user.pembimbingWa.replace(/\D/g,'');
 
-            if (wa.startsWith("08")) {
-                wa = "62" + wa.substring(1);
+            if(wa.startsWith("08")){
+                wa="62"+wa.substring(1);
             }
 
-            waEl.href = `https://wa.me/${wa}`;
+            waEl.href=`https://wa.me/${wa}`;
             waEl.classList.remove("hidden");
 
-        } else if (waEl) {
+        }else if(waEl){
 
             waEl.classList.add("hidden");
 
         }
 
-        // ===============================
+        // ======================
         // LAST ABSEN
-        // ===============================
+        // ======================
 
-        if (last) {
+        if(last){
 
-            setHTML("ui-last-absen", `
-                <p>
-                    <b>${last.tipe}</b>
-                </p>
-
-                <p>
-                    ${last.tanggal} ${last.jam}
-                </p>
-
-                <p>
-                    ${Math.round(last.jarak)} meter
-                </p>
+            setHTML("ui-last-absen",`
+                <p><b>${last.tipe}</b></p>
+                <p>${last.tanggal} ${last.jam}</p>
+                <p>${Math.round(last.jarak)} meter</p>
             `);
 
-        } else {
+        }else{
 
-            setHTML("ui-last-absen", `
-                <p>Belum ada riwayat absensi</p>
-            `);
+            setHTML("ui-last-absen",
+                "<p>Belum ada riwayat absensi</p>"
+            );
 
         }
 
-        console.log("Dashboard loaded");
-        console.log("Riwayat:", riwayat.length);
-        console.log("Bulan ini:", thisMonth.length);
-        console.log("Total Hadir:", totalHadir);
+    }
+    catch(err){
 
-    } catch (error) {
+        console.error(err);
+        showToast("Gagal memuat dashboard",true);
 
-        console.error("Dashboard error:", error);
-        showToast("Gagal load dashboard", true);
-
-    } finally {
+    }
+    finally{
 
         hideLoader();
 
     }
+
 }
 
 function getTodayStatus(riwayat) {
@@ -1640,19 +1610,23 @@ function getMonthShort(month) {
     return months[month - 1] || "";
 }
 
-function initStudentHistoryFilter() {
+function initStudentHistoryFilter(force = false) {
+
     const now = new Date();
 
     const monthEl = document.getElementById("student-history-month");
     const yearEl = document.getElementById("student-history-year");
 
-    if (monthEl) {
+    if (!monthEl || !yearEl) return;
+
+    if (force || !monthEl.value) {
         monthEl.value = now.getMonth() + 1;
     }
 
-    if (yearEl) {
+    if (force || !yearEl.value) {
         yearEl.value = now.getFullYear();
     }
+
 }
 
 //KONFIRMASI KEHADIRAN

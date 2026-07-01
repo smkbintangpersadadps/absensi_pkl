@@ -32,22 +32,33 @@
 // }
 
 async function loadHistory() {
+
+    showLoader("Memuat riwayat...");
+
     try {
         const user = AppState.currentUser;
         if (!user) return;
 
         const role = String(user.role || "").trim().toLowerCase();
 
+        const monthEl = document.getElementById("student-history-month");
+        const yearEl = document.getElementById("student-history-year");
+
+        const bulan = Number(monthEl.value);
+        const tahun = Number(yearEl.value);
+
         const data = await ApiService.call({
             action: "get_riwayat",
             role: user.role,
-            username: user.username
+            username: user.username,
+            bulan,
+            tahun
         });
 
         AppState.riwayat = data;
 
         if (role === "siswa" || role === "peserta") {
-            initStudentHistoryFilter();
+            // initStudentHistoryFilter();
 
             const monthEl = document.getElementById("student-history-month");
             const yearEl = document.getElementById("student-history-year");
@@ -71,7 +82,9 @@ async function loadHistory() {
     } catch (error) {
         console.error("Load history error:", error);
         showToast("Gagal memuat riwayat", true);
-    }
+    } finally {
+        hideLoader();
+    }    
 }
 
 function renderHistoryTable(data) {
