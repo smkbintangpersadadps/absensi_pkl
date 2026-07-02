@@ -264,6 +264,12 @@ function getRekapBadgeClass(kode) {
 
         case "LA":
             return "rekap-lupa";
+        
+        case "W":
+            return "rekap-wfh";
+        
+        case "ML":
+            return "rekap-ml";
 
         case "PD":
             return "rekap-pending";

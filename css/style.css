@@ -1233,6 +1233,16 @@ button:disabled {
     color: #c2410c;
 }
 
+.rekap-wfh {
+    background: #ccdcff;
+    color: #ff761b;
+}
+
+.rekap-ml {
+    background: #dcfce7;
+    color: #ff30c1;
+}
+
 .rekap-kosong {
     background: #f1f5f9;
     color: #94a3b8;
