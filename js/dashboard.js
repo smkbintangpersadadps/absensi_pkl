@@ -1610,7 +1610,25 @@ function getMonthShort(month) {
     return months[month - 1] || "";
 }
 
-function initStudentHistoryFilter(force = false) {
+// function initStudentHistoryFilter(force = false) {
+
+//     const now = new Date();
+
+//     const monthEl = document.getElementById("student-history-month");
+//     const yearEl = document.getElementById("student-history-year");
+
+//     if (!monthEl || !yearEl) return;
+
+//     if (force || !monthEl.value) {
+//         monthEl.value = now.getMonth() + 1;
+//     }
+
+//     if (force || !yearEl.value) {
+//         yearEl.value = now.getFullYear();
+//     }
+
+// }
+function initStudentHistoryFilter() {
 
     const now = new Date();
 
@@ -1619,13 +1637,8 @@ function initStudentHistoryFilter(force = false) {
 
     if (!monthEl || !yearEl) return;
 
-    if (force || !monthEl.value) {
-        monthEl.value = now.getMonth() + 1;
-    }
-
-    if (force || !yearEl.value) {
-        yearEl.value = now.getFullYear();
-    }
+    monthEl.value = String(now.getMonth() + 1);
+    yearEl.value = String(now.getFullYear());
 
 }
 

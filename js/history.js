@@ -31,21 +31,91 @@
 //     }
 // }
 
-async function loadHistory() {
+// async function loadHistory() {
+
+//     showLoader("Memuat riwayat...");
+
+//     try {
+//         const user = AppState.currentUser;
+//         if (!user) return;
+
+//         const role = String(user.role || "").trim().toLowerCase();
+
+//         const monthEl = document.getElementById("student-history-month");
+//         const yearEl = document.getElementById("student-history-year");
+
+//         const bulan = Number(monthEl.value);
+//         const tahun = Number(yearEl.value);
+
+//         const data = await ApiService.call({
+//             action: "get_riwayat",
+//             role: user.role,
+//             username: user.username,
+//             bulan,
+//             tahun
+//         });
+
+//         AppState.riwayat = data;
+
+//         if (role === "siswa" || role === "peserta") {
+//             initStudentHistoryFilter();
+
+//             const monthEl = document.getElementById("student-history-month");
+//             const yearEl = document.getElementById("student-history-year");
+//             console.log("Before:", monthEl.value);
+//             const bulan = Number(monthEl?.value || (new Date().getMonth() + 1));
+//             const tahun = Number(yearEl?.value || new Date().getFullYear());
+//             console.log("After:", monthEl.value);
+
+//             const statusData = await ApiService.call({
+//                 action: "get_status_history_month",
+//                 username: user.username,
+//                 bulan,
+//                 tahun
+//             });
+
+//             renderStudentHistoryCards(data, statusData);
+//             return;
+//         }
+
+//         renderHistoryTable(data);
+
+//     } catch (error) {
+//         console.error("Load history error:", error);
+//         showToast("Gagal memuat riwayat", true);
+//     } finally {
+//         hideLoader();
+//     }    
+// }
+
+async function loadHistory(resetFilter = false) {
 
     showLoader("Memuat riwayat...");
 
     try {
+
         const user = AppState.currentUser;
         if (!user) return;
 
         const role = String(user.role || "").trim().toLowerCase();
+
+        // ===============================
+        // Reset filter hanya saat buka halaman
+        // ===============================
+
+        if (resetFilter) {
+            initStudentHistoryFilter();
+        }
 
         const monthEl = document.getElementById("student-history-month");
         const yearEl = document.getElementById("student-history-year");
 
         const bulan = Number(monthEl.value);
         const tahun = Number(yearEl.value);
+
+        // ===============================
+        // Ambil Riwayat
+        // ===============================
 
         const data = await ApiService.call({
             action: "get_riwayat",
@@ -55,16 +125,9 @@ async function loadHistory() {
             tahun
         });
 
-        AppState.riwayat = data;
+        AppState.riwayat = data || [];
 
         if (role === "siswa" || role === "peserta") {
-            // initStudentHistoryFilter();
-
-            const monthEl = document.getElementById("student-history-month");
-            const yearEl = document.getElementById("student-history-year");
-
-            const bulan = Number(monthEl?.value || (new Date().getMonth() + 1));
-            const tahun = Number(yearEl?.value || new Date().getFullYear());
 
             const statusData = await ApiService.call({
                 action: "get_status_history_month",
@@ -73,18 +136,28 @@ async function loadHistory() {
                 tahun
             });
 
-            renderStudentHistoryCards(data, statusData);
-            return;
+            renderStudentHistoryCards(
+                AppState.riwayat,
+                statusData || []
+            );
+
+        } else {
+
+            renderHistoryTable(AppState.riwayat);
+
         }
 
-        renderHistoryTable(data);
-
     } catch (error) {
+
         console.error("Load history error:", error);
         showToast("Gagal memuat riwayat", true);
+
     } finally {
+
         hideLoader();
-    }    
+
+    }
+
 }
 
 function renderHistoryTable(data) {

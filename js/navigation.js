@@ -163,7 +163,7 @@ function runPageLoader(pageId) {
             break;
 
         case "page-history":
-            loadHistory?.();
+            loadHistory(true);
             break;
         
         case "page-kepsek-dashboard":
