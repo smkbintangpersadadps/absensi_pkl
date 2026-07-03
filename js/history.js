@@ -276,6 +276,13 @@ async function loadWaliHistory(useLoader = false) {
                     <td>${Math.round(r.jarak || 0)} m</td>
                     <td>
                         ${
+                            r.fotoUrl
+                                ? `<a href="${r.fotoUrl}" target="_blank" class="text-indigo-600 font-medium">Lihat</a>`
+                                : "-"
+                        }
+                    </td>
+                    <td>
+                        ${
                             r.maps
                                 ? `<a href="${r.maps}" target="_blank" class="text-indigo-600 font-medium">Lihat</a>`
                                 : "-"
