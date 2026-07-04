@@ -611,7 +611,11 @@ function renderStudentHistoryCards(riwayat, statusData = []) {
                 ${
                     hasStatus && !masuk && !pulang
                         ? renderStatusHistoryBlock(statusHari)
-                        : renderNormalHistoryBlock(masuk, pulang)
+                        : renderNormalHistoryBlock(
+                            masuk,
+                            pulang,
+                            statusHari
+                        )
                 }
 
             </div>
@@ -621,7 +625,7 @@ function renderStudentHistoryCards(riwayat, statusData = []) {
     container.innerHTML = html;
 }
 
-function renderNormalHistoryBlock(masuk, pulang) {
+function renderNormalHistoryBlock(masuk, pulang, statusHari) {
     return `
         <div class="history-action">
             <div class="history-badge in">Scan In</div>
@@ -638,13 +642,41 @@ function renderNormalHistoryBlock(masuk, pulang) {
         <div class="history-action">
             <div class="history-badge out">Scan Out</div>
 
-            <div class="history-time">
-                ${pulang ? pulang.timestamp.split(" ")[1] : "00:00:00"}
-            </div>
+            ${
+                pulang
+                ? `
+                    <div class="history-time">
+                        ${pulang.timestamp.split(" ")[1]}
+                    </div>
 
-            <div class="history-note">
-                ${pulang ? `${Math.round(pulang.jarak || 0)} meter` : "Belum absen"}
-            </div>
+                    <div class="history-note">
+                        ${Math.round(pulang.jarak || 0)} meter
+                    </div>
+                `
+                : (
+                    statusHari &&
+                    String(statusHari.approval).toLowerCase() === "approved" &&
+                    String(statusHari.status).toLowerCase() === "lupa absen"
+                )
+                ? `
+                    <div class="history-time text-blue-600 font-semibold">
+                        Lupa Absen
+                    </div>
+
+                    <div class="history-note">
+                        ${statusHari.keterangan || ""}
+                    </div>
+                `
+                : `
+                    <div class="history-time">
+                        00:00:00
+                    </div>
+
+                    <div class="history-note">
+                        Belum absen
+                    </div>
+                `
+            }
         </div>
     `;
 }
@@ -654,20 +686,15 @@ function renderStatusHistoryBlock(statusHari) {
 
     return `
         <div class="history-status-special">
-
            <div class="flex items-center justify-center gap-2 flex-wrap">
-
-    <span class="inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClass(statusHari.status)}">
-        <i class="fa-solid fa-calendar-check"></i>
-        ${statusHari.status || "-"}
-    </span>
-
-    <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getApprovalBadgeClass(approval)}">
-        ${approval}
-    </span>
-
-</div>
-
+                <span class="inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-semibold ${getStatusBadgeClass(statusHari.status)}">
+                    <i class="fa-solid fa-calendar-check"></i>
+                        ${statusHari.status || "-"}
+                </span>
+                <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getApprovalBadgeClass(approval)}">
+                    ${approval}
+                </span>
+            </div>
             ${
                 statusHari.keterangan
                     ? `<div class="mt-2 text-xs text-slate-500 italic">
@@ -675,14 +702,9 @@ function renderStatusHistoryBlock(statusHari) {
                        </div>`
                     : ""
             }
-
         </div>
-
         <div class="history-action">
             <div class="history-badge out">Status</div>
-
-            
-
             <div class="history-note">
                 Tidak perlu absen
             </div>
