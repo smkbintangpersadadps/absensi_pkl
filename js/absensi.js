@@ -5,6 +5,7 @@
 let currentLocation = null;
 let currentStream = null;
 let capturedPhoto = null;
+let statusPhoto = null;
 
 
 // ===============================

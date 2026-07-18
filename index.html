@@ -970,6 +970,53 @@
                             rows="3"
                             placeholder="Contoh: Jadwal libur dari industri"></textarea>
                     </div>
+                    <!-- =============================== -->
+                    <!-- Upload Bukti -->
+                    <!-- =============================== -->
+                    <div class="mt-4">
+                        <label class="block font-semibold mb-3">
+                            Upload Bukti <br>
+                            Opsional, Hanya Izin dan Sakit yang Wajib menyertakan bukti !!
+                        </label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- Tombol Kamera -->
+                            <button
+                                type="button"
+                                onclick="openStatusCamera()"
+                                class="bg-orange-400 hover:bg-indigo-700 text-white rounded-xl p-3 font-semibold flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-camera"></i>
+                                Ambil Foto
+                            </button>
+                            <!-- Tombol Galeri -->
+                            <button
+                                type="button"
+                                onclick="openStatusGallery()"
+                                class="bg-slate-600 hover:bg-slate-700 text-white rounded-xl p-3 font-semibold flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-image"></i>
+                                Pilih Galeri
+                            </button>
+                        </div>
+                        <!-- Input Kamera -->
+                        <input
+                            id="status-camera-input"
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onchange="previewStatusPhoto(event)"
+                            class="hidden">
+                        <!-- Input Galeri -->
+                        <input
+                            id="status-gallery-input"
+                            type="file"
+                            accept="image/*"
+                            onchange="previewStatusPhoto(event)"
+                            class="hidden">
+                        <!-- Preview -->
+                        <img
+                            id="status-photo-preview"
+                            src=""
+                            class="hidden-page mt-4 rounded-xl w-full border shadow">
+                    </div>
                     <button onclick="submitStatusHarian()"
                         class="w-full bg-indigo-600 text-white p-3 rounded-xl font-semibold">
                         Kirim Konfirmasi

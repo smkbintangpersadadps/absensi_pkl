@@ -1643,6 +1643,23 @@ function initStudentHistoryFilter() {
 }
 
 //KONFIRMASI KEHADIRAN
+
+function openStatusCamera() {
+
+    document
+        .getElementById("status-camera-input")
+        .click();
+
+}
+
+function openStatusGallery() {
+
+    document
+        .getElementById("status-gallery-input")
+        .click();
+
+}
+
 function initStatusHarianForm() {
     const tanggalEl = document.getElementById("status-tanggal");
 
@@ -1654,6 +1671,98 @@ function initStatusHarianForm() {
 
         tanggalEl.value = `${yyyy}-${mm}-${dd}`;
     }
+}
+
+//Compress
+async function compressImage(file, options = {}) {
+    const {
+        maxWidth = 1280,
+        quality = 0.75
+    } = options;
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                let width = img.width;
+                let height = img.height;
+                if (width > maxWidth) {
+                    height = height * (maxWidth / width);
+                    width = maxWidth;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(
+                    canvas.toDataURL(
+                        "image/jpeg",
+                        quality
+                    )
+                );
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+//PREVIEW
+async function previewStatusPhoto(event) {
+
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+
+        showToast(
+            "Ukuran maksimal 10 MB",
+            true
+        );
+
+        return;
+
+    }
+
+    showLoader("Memproses foto...");
+
+    try {
+
+        statusPhoto = await compressImage(file, {
+            maxWidth: 1280,
+            quality: 0.75
+        });
+
+        const preview =
+            document.getElementById(
+                "status-photo-preview"
+            );
+
+        preview.src = statusPhoto;
+
+        preview.classList.remove("hidden-page");
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        showToast(
+            "Gagal membaca gambar",
+            true
+        );
+
+    }
+    finally{
+
+        hideLoader();
+
+    }
+
 }
 
 async function submitStatusHarian() {
@@ -1674,6 +1783,21 @@ async function submitStatusHarian() {
             showToast("Pilih status terlebih dahulu", true);
             return;
         }
+        // ===============================
+        // VALIDASI FOTO BUKTI
+        // ===============================
+        const wajibFoto = [
+            "Sakit",
+            "Izin"
+        ];
+
+        if (
+            wajibFoto.includes(status) &&
+            !statusPhoto
+        ) {
+            showToast("Silakan upload foto bukti terlebih dahulu.", true);
+            return;
+        }
 
         showLoader("Mengirim konfirmasi...");
 
@@ -1685,7 +1809,8 @@ async function submitStatusHarian() {
             kategori: user.kategori,
             lokasiId: user.lokasiId,
             status,
-            keterangan
+            keterangan,
+            fotoBase64: statusPhoto
         });
 
         if (res.status === "error") {
@@ -1701,8 +1826,9 @@ async function submitStatusHarian() {
             showConfirmButton: false
         });
 
-        document.getElementById("status-tipe").value = "";
-        document.getElementById("status-keterangan").value = "";
+        // document.getElementById("status-tipe").value = "";
+        // document.getElementById("status-keterangan").value = "";
+        resetStatusHarianForm();
 
     } catch (error) {
         console.error(error);
@@ -1711,4 +1837,25 @@ async function submitStatusHarian() {
     } finally {
         hideLoader();
     }
+}
+
+function resetStatusHarianForm() {
+
+    statusPhoto = null;
+
+    document.getElementById("status-tipe").value = "";
+
+    document.getElementById("status-keterangan").value = "";
+
+    document.getElementById("status-camera-input").value = "";
+
+    document.getElementById("status-gallery-input").value = "";
+
+    const preview =
+        document.getElementById("status-photo-preview");
+
+    preview.src = "";
+
+    preview.classList.add("hidden-page");
+
 }
