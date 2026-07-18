@@ -169,6 +169,10 @@ function runPageLoader(pageId) {
         case "page-kepsek-dashboard":
             loadKepsekDashboard?.(true);
             break;
+
+        case "page-user-profile":
+            loadProfile();
+            break;
     }
 }
 
@@ -251,6 +255,7 @@ function buildMenu(user) {
                     <span>Riwayat Status</span>
                 </a>
                 <a href="#" onclick="navigateTo('page-history')">Riwayat</a>
+                <a href="#" onclick="navigateTo('page-user-profile')">Profil</a>
             `;
         }
     }
@@ -262,7 +267,8 @@ function setActiveNav(pageId) {
         "page-user-absen": 1,
         "page-user-status": 2,
         "page-user-status-history": 3,
-        "page-history": 4
+        "page-history": 4,
+        "page-user-profile": 5
     };
 
     const index = map[pageId];
@@ -412,7 +418,197 @@ function buildMobileBottomMenu(user) {
                     <i class="fa-solid fa-clock-rotate-left text-lg"></i>
                     <span>Riwayat</span>
                 </button>
+
+                <button onclick="navigateTo('page-user-profile')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+
+                    <i class="fa-solid fa-user text-lg"></i>
+
+                    <span>Profil</span>
+
+                </button>
             `;
         }
     }
+}
+
+// CHANGE PASSWORD
+function loadProfile(){
+
+    const user = AppState.currentUser;
+
+    if(!user) return;
+
+    document.getElementById("profile-nama").innerText =
+        user.nama || "-";
+
+    document.getElementById("profile-role").innerText =
+        user.kategori || "-";
+
+    document.getElementById("profile-username").innerText =
+        user.username || "-";
+
+    document.getElementById("profile-lokasi").innerText =
+        AppState.currentUserLocation?.namaIndustri || "-";
+
+    document.getElementById("profile-pembimbing").innerText =
+        user.pembimbingNama || "-";
+
+}
+
+function showChangePassword(){
+
+    document
+        .getElementById("modal-change-password")
+        .classList.remove("hidden-page");
+
+}
+
+function closeChangePassword(){
+    document
+        .getElementById("modal-change-password")
+        .classList.add("hidden-page");
+    [
+        "old-password",
+        "new-password",
+        "confirm-password"
+    ].forEach(id=>{
+        document.getElementById(id).value="";
+    });
+    checkPasswordStrength();
+}
+
+async function changePassword() {
+
+    const user = AppState.currentUser;
+    if (!user) return;
+    const oldPassword =
+        document.getElementById("old-password").value.trim();
+    const newPassword =
+        document.getElementById("new-password").value.trim();
+    const confirmPassword =
+        document.getElementById("confirm-password").value.trim();
+    // ===============================
+    // VALIDASI
+    // ===============================
+    if (!oldPassword) {
+        showToast("Masukkan password lama.", true);
+        return;
+    }
+    if (newPassword.length < 6) {
+        showToast("Password baru minimal 6 karakter.", true);
+        return;
+    }
+    if (newPassword !== confirmPassword) {
+        showToast("Konfirmasi password tidak sama.", true);
+        return;
+    }
+    if (oldPassword === newPassword) {
+        showToast("Password baru harus berbeda dengan password lama.", true);
+        return;
+    }
+
+    // =========================
+    // LOADING BUTTON
+    // =========================
+
+    const btn = document.getElementById("btn-change-password");
+
+        btn.disabled = true;
+        btn.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+        Menyimpan...
+        `;
+
+    try {
+        showLoader("Mengubah password...");
+        const res = await ApiService.call({
+            action: "change_password",
+            username: user.username,
+            oldPassword,
+            newPassword
+        });
+        if (res.status === "error") {
+            hideLoader();
+            resetChangePasswordButton();
+            showToast(
+                res.message || "Gagal mengubah password.",
+                true
+            );
+            return;
+        }
+        // ===============================
+        // SUKSES
+        // ===============================
+        closeChangePassword();
+        hideLoader();
+        await Swal.fire({
+            icon: "success",
+            title: "Password Berhasil Diubah",
+            text: "Silakan login kembali menggunakan password baru.",
+            confirmButtonText: "Login Ulang",
+            confirmButtonColor: "#4f46e5",
+            allowOutsideClick: false
+        });
+        resetChangePasswordButton();
+        logout();
+    }
+    catch (err) {
+        console.error("Change Password Error :", err);
+        hideLoader();
+        resetChangePasswordButton();
+        showToast("Terjadi kesalahan saat mengubah password.", true );
+    }
+}
+
+function togglePassword(id, btn){
+
+    const input=document.getElementById(id);
+    const icon=btn.querySelector("i");
+    if(input.type==="password"){
+        input.type="text";
+        icon.className="fa-solid fa-eye-slash";
+    }else{
+        input.type="password";
+        icon.className="fa-solid fa-eye";
+    }
+}
+
+function checkPasswordStrength(){
+
+    const input=document.getElementById("new-password");
+    const bar=document.getElementById("password-strength-bar");
+    const text=document.getElementById("password-strength-text");
+    const pass=input.value;
+    let score=0;
+    if(pass.length>=6) score++;
+    if(/[A-Z]/.test(pass)) score++;
+    if(/[0-9]/.test(pass)) score++;
+    if(/[!@#$%^&*]/.test(pass)) score++;
+    const widths=["0%","25%","50%","75%","100%"];
+    const colors=[
+        "bg-gray-300",
+        "bg-red-500",
+        "bg-orange-500",
+        "bg-yellow-500",
+        "bg-green-500"
+    ];
+    const labels=[
+        "Minimal 6 karakter",
+        "Lemah",
+        "Sedang",
+        "Baik",
+        "Sangat Kuat"
+    ];
+    bar.style.width=widths[score];
+    bar.className=
+        `h-full rounded-full transition-all duration-300 ${colors[score]}`;
+    text.innerHTML=labels[score];
+}
+
+function resetChangePasswordButton(){
+    const btn = document.getElementById("btn-change-password");
+    if(!btn) return;
+    btn.disabled = false;
+    btn.innerHTML = "Simpan Password";
 }
