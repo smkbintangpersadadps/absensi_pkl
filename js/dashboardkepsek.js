@@ -446,7 +446,8 @@ const KepsekDashboardService = {
             // RENDER SUMMARY
             // =================================================
             this.renderSummary(
-                dashboardData
+                dashboardData,
+                lokasi
             );
             // =================================================
             // RENDER REKAP INDUSTRI

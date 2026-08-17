@@ -233,146 +233,356 @@ function buildMenu(user) {
     }
 }
 
-// ===============================
-// ACTIVE PAGE
-// ===============================
+// =========================================================
+// ACTIVE PAGE - MOBILE BOTTOM NAV
+// =========================================================
 function setActiveNav(pageId) {
-    const map = {
-        "page-user-dashboard": 0,
-        "page-user-absen": 1,
-        "page-user-status": 2,
-        "page-user-status-history": 3,
-        "page-history": 4,
-    };
-    const index = map[pageId];
-    document.querySelectorAll(".bottom-nav").forEach((btn, i) => {
-        if (i === index) {
-            btn.classList.add("active");
-        } else {
-            btn.classList.remove("active");
-        }
-    });
-}
+    if (!pageId) {
+        return;
+    }
+    // =====================================================
+    // HAPUS ACTIVE DARI SEMUA MENU
+    // =====================================================
+    document
+        .querySelectorAll(
+            "#mobile-bottom-menu .bottom-nav, " +
+            "#mobile-bottom-menu .bottom-nav-kep"
+        )
+        .forEach(btn => {
+            btn.classList.remove(
+                "active",
+                "text-indigo-600",
+                "text-gray-500"
+            );
+        });
+    // =====================================================
+    // CARI MENU BERDASARKAN DATA-PAGE
+    // =====================================================
+    const activeButton =
+        document.querySelector(
+            `#mobile-bottom-menu [data-page="${pageId}"]`
+        );
+    if (!activeButton) {
+        return;
+    }
+    // =====================================================
+    // ACTIVE
+    // =====================================================
+    activeButton.classList.add(
+        "active",
+        "text-indigo-600"
+    );
+    activeButton.classList.remove(
+        "text-gray-500"
+    );
 
-// ===============================
-// MOBILE BOTTOM
-// ===============================
+}
+// =========================================================
+// MOBILE BOTTOM MENU
+// =========================================================
 function buildMobileBottomMenu(user) {
-    const menu = document.getElementById("mobile-bottom-menu");
-    if (!menu || !user) return;
-    const role = user.role;
-    // ===============================
+    const menu =
+        document.getElementById(
+            "mobile-bottom-menu"
+        );
+    if (!menu || !user) {
+        return;
+    }
+    const role =
+        String(
+            user.role || ""
+        )
+        .trim()
+        .toLowerCase();
+    // =====================================================
     // ADMIN
-    // ===============================
+    // =====================================================
     if (role === "admin") {
         menu.innerHTML = `
-            <button onclick="navigateTo('page-admin-dashboard')"
+            <button
+                type="button"
+                data-page="page-admin-dashboard"
+                onclick="navigateTo('page-admin-dashboard')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-chart-line text-lg"></i>
-                <span>Dashboard</span>
+                <span>
+                    Dashboard
+                </span>
             </button>
-            <button onclick="navigateTo('page-admin-users')"
+            <button
+                type="button"
+                data-page="page-admin-users"
+                onclick="navigateTo('page-admin-users')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-users text-lg"></i>
-                <span>User</span>
+                <span>
+                    User
+                </span>
             </button>
-            <button onclick="navigateTo('page-history')"
+            <button
+                type="button"
+                data-page="page-history"
+                onclick="navigateTo('page-history')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                <span>Riwayat</span>
+                <span>
+                    Riwayat
+                </span>
             </button>
         `;
     }
-    // ===============================
-    // WALI / PEMBIMBING
-    // ===============================
+    // =====================================================
+    // WALI
+    // =====================================================
     else if (role === "wali") {
         menu.innerHTML = `
-            <button onclick="navigateTo('page-wali-dashboard')"
+            <button
+                type="button"
+                data-page="page-wali-dashboard"
+                onclick="navigateTo('page-wali-dashboard')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-chart-line text-lg"></i>
-                <span>Monitoring</span>
+                <span>
+                    Monitoring
+                </span>
             </button>
-            <button onclick="navigateTo('page-wali-approval')"
+            <button
+                type="button"
+                data-page="page-wali-approval"
+                onclick="navigateTo('page-wali-approval')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-clipboard-check text-lg"></i>
-                <span>Approval</span>
+                <span>
+                    Approval
+                </span>
             </button>
-            <button onclick="navigateTo('page-wali-rekap')"
+            <button
+                type="button"
+                data-page="page-wali-rekap"
+                onclick="navigateTo('page-wali-rekap')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-table-list text-lg"></i>
-                <span>Rekap</span>
+                <span>
+                    Rekap
+                </span>
             </button>
-            <button onclick="navigateTo('page-wali-history')"
+            <button
+                type="button"
+                data-page="page-wali-history"
+                onclick="navigateTo('page-wali-history')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                <span>Monitoring Harian</span>
+                <span>
+                    Monitoring Harian
+                </span>
             </button>
         `;
     }
-    // ===============================
-    // KEPALA SEKOLAH
-    // ===============================
-    else if (role === "kepsek") {
+    // =====================================================
+    // PEMBIMBING
+    // =====================================================
+    else if (role === "pembimbing") {
         menu.innerHTML = `
-            <button onclick="navigateTo('page-kepsek-dashboard')"
+            <button
+                type="button"
+                data-page="page-wali-dashboard"
+                onclick="navigateTo('page-wali-dashboard')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                <i class="fa-solid fa-school text-lg"></i>
-                <span>Kepsek</span>
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span>
+                    Monitoring
+                </span>
             </button>
-            <button onclick="navigateTo('page-wali-rekap')"
+            <button
+                type="button"
+                data-page="page-wali-approval"
+                onclick="navigateTo('page-wali-approval')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-clipboard-check text-lg"></i>
+                <span>
+                    Approval
+                </span>
+            </button>
+            <button
+                type="button"
+                data-page="page-wali-rekap"
+                onclick="navigateTo('page-wali-rekap')"
                 class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                 <i class="fa-solid fa-table-list text-lg"></i>
-                <span>Rekap</span>
+                <span>
+                    Rekap
+                </span>
             </button>
-            <button onclick="navigateTo('page-master-siswa')"
-                class="sidebar-link"
-                data-page="page-master-siswa">
-                <i class="fa-solid fa-user-graduate w-5"></i>
-                <span>Data Siswa</span>
+            <button
+                type="button"
+                data-page="page-wali-history"
+                onclick="navigateTo('page-wali-history')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <span>
+                    Monitoring Harian
+                </span>
             </button>
         `;
     }
-    // ===============================
+    // =====================================================
+    // KEPALA SEKOLAH
+    // =====================================================
+    else if (role === "kepsek") {
+        menu.innerHTML = `
+            <button
+                type="button"
+                data-page="page-kepsek-dashboard"
+                onclick="navigateTo('page-kepsek-dashboard')"
+                class="bottom-nav-kep flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-school text-lg"></i>
+                <span>
+                    Kepsek
+                </span>
+            </button>
+            <button
+                type="button"
+                data-page="page-wali-rekap"
+                onclick="navigateTo('page-wali-rekap')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-table-list text-lg"></i>
+                <span>
+                    Rekap
+                </span>
+            </button>
+            <button
+                type="button"
+                data-page="page-master-siswa"
+                onclick="navigateTo('page-master-siswa')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-user-graduate text-lg"></i>
+                <span>
+                    Siswa
+                </span>
+            </button>
+            <button
+                type="button"
+                data-page="page-master-lokasi"
+                onclick="navigateTo('page-master-lokasi')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-location-dot text-lg"></i>
+                <span>
+                    Lokasi
+                </span>
+            </button>
+            <button
+                type="button"
+                data-page="page-kepsek-hari-libur"
+                onclick="navigateTo('page-kepsek-hari-libur')"
+                class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                <i class="fa-solid fa-calendar-plus text-lg"></i>
+                <span>
+                    Libur
+                </span>
+            </button>
+        `;
+    }
+    // =====================================================
     // SISWA
-    // ===============================
+    // =====================================================
     else {
-        if (AppState.accessMode === "ortu") {
+        // =================================================
+        // ORANG TUA
+        // =================================================
+        if (
+            AppState.accessMode === "ortu"
+        ) {
             menu.innerHTML = `
-                <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-house text-lg"></i>
-                    <span>Home</span>
-                </button>
-                <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                    <span>Riwayat</span>
-                </button>
-            `;
-        } else {
-            menu.innerHTML = `
-                <button onclick="navigateTo('page-user-dashboard')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-house text-lg"></i>
-                    <span>Home</span>
-                </button>
-                <button onclick="navigateTo('page-user-absen')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-camera text-lg"></i>
-                    <span>Absen</span>
-                </button>
-                <button onclick="navigateTo('page-user-status')"
+                <button
+                    type="button"
+                    data-page="page-user-dashboard"
+                    onclick="navigateTo('page-user-dashboard')"
                     class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-calendar-check text-lg"></i>
-                    <span>Status</span>
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span>
+                        Home
+                    </span>
                 </button>
-                <button onclick="navigateTo('page-user-status-history')"
+                <button
+                    type="button"
+                    data-page="page-history"
+                    onclick="navigateTo('page-history')"
                     class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
-                    <i class="fa-solid fa-list-check text-lg"></i>
-                    <span>Approval</span>
-                </button>
-                <button onclick="navigateTo('page-history')" class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
                     <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                    <span>Riwayat</span>
+                    <span>
+                        Riwayat
+                    </span>
                 </button>
             `;
         }
+        // =================================================
+        // SISWA
+        // =================================================
+        else {
+            menu.innerHTML = `
+                <button
+                    type="button"
+                    data-page="page-user-dashboard"
+                    onclick="navigateTo('page-user-dashboard')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span>
+                        Home
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    data-page="page-user-absen"
+                    onclick="navigateTo('page-user-absen')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-camera text-lg"></i>
+                    <span>
+                        Absen
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    data-page="page-user-status"
+                    onclick="navigateTo('page-user-status')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                    <span>
+                        Status
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    data-page="page-user-status-history"
+                    onclick="navigateTo('page-user-status-history')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                    <span>
+                        Approval
+                    </span>
+                </button>
+                <button
+                    type="button"
+                    data-page="page-history"
+                    onclick="navigateTo('page-history')"
+                    class="bottom-nav flex flex-col items-center text-xs text-gray-500 transition">
+                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                    <span>
+                        Riwayat
+                    </span>
+                </button>
+            `;
+        }
+    }
+    // =====================================================
+    // SET ACTIVE PAGE SAAT MENU SELESAI DIBUAT
+    // =====================================================
+    const activePage =
+        document.querySelector(
+            ".page.active, .page:not(.hidden-page)"
+        );
+    if (activePage) {
+        setActiveNav(
+            activePage.id
+        );
     }
 }
