@@ -922,17 +922,74 @@ function getRekapBadgeClass(kode) {
 // REKAP FILTER
 // ===============================
 function renderRekapKategoriFilter(kategoriList, selected = "ALL") {
-    const select = document.getElementById("rekap-kategori");
+
+    const select =
+        document.getElementById("rekap-kategori");
+
     if (!select) return;
 
+    // ===============================
+    // NORMALISASI DATA
+    // ===============================
+
+    const list =
+        [...new Set(
+            (kategoriList || [])
+                .map(k =>
+                    String(k || "").trim()
+                )
+                .filter(Boolean)
+        )]
+        .sort((a, b) =>
+            a.localeCompare(b, "id", {
+                numeric: true
+            })
+        );
+
+
+    // ===============================
+    // SIMPAN NILAI YANG SEDANG DIPILIH
+    // ===============================
+
+    const currentValue =
+        String(
+            select.value || selected || "ALL"
+        ).trim();
+
+
+    // ===============================
+    // BUAT OPTIONS
+    // ===============================
+
     select.innerHTML = `
-        <option value="ALL">Semua Kelas</option>
-        ${kategoriList.map(k => `
-            <option value="${k}" ${selected === k ? "selected" : ""}>
-                ${k}
+        <option value="ALL">
+            Semua Kelas
+        </option>
+
+        ${list.map(k => `
+            <option value="${escapeHTML(k)}">
+                ${escapeHTML(k)}
             </option>
         `).join("")}
     `;
+
+
+    // ===============================
+    // KEMBALIKAN SELECTION
+    // ===============================
+
+    const valueToUse =
+        list.includes(currentValue)
+            ? currentValue
+            : (
+                list.includes(selected)
+                    ? selected
+                    : "ALL"
+            );
+
+
+    select.value = valueToUse;
+
 }
 
 // ===============================
@@ -1015,14 +1072,24 @@ const RekapBulananService = {
                 "rekap-kategori"
             )?.value || "ALL";
         if (
-            role === "kepsek" &&
-            typeof renderRekapKategoriFilter === "function"
-        ) {
-            renderRekapKategoriFilter(
-                data.kategoriList || [],
-                filterKategori
-            );
-        }
+                role === "kepsek" &&
+                typeof renderRekapKategoriFilter === "function"
+            ) {
+                const kategoriSelect =
+                    document.getElementById(
+                        "rekap-kategori"
+                    );
+                // Hanya render pertama kali
+                if (
+                    kategoriSelect &&
+                    kategoriSelect.options.length <= 1
+                ) {
+                    renderRekapKategoriFilter(
+                        data.kategoriList || [],
+                        "ALL"
+                    );
+                }
+            }
         this.render(data);
     }
         catch (error) {

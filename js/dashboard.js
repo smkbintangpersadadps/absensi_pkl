@@ -406,6 +406,64 @@ async function getMonitoringDashboard(mode, username) {
 // ===============================
 // LOAD WALI DASHBOARD
 // ===============================
+function getTodayLocalDate() {
+
+    const now =
+        new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
+function getLocalDateFromTimestamp(
+    timestamp
+) {
+
+    if (!timestamp) {
+        return "";
+    }
+
+    const date =
+        new Date(timestamp);
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+        return "";
+    }
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
 async function loadWaliDashboard(useLoader = false) {
     try {
         const user = AppState.currentUser;
@@ -466,16 +524,23 @@ async function loadWaliDashboard(useLoader = false) {
             return;
         }
         const today =
-            new Date().toISOString().split("T")[0];
+            getTodayLocalDate();
+
         const hadirHariIni =
             riwayat.filter(r => {
+
                 const tanggalAbsen =
-                    String(r.waktu || "")
-                    .split("T")[0];
+                    getLocalDateFromTimestamp(
+                        r.waktu
+                    );
+
                 return (
                     tanggalAbsen === today &&
-                    String(r.tipe || "").toLowerCase() === "masuk"
+                    String(r.tipe || "")
+                        .trim()
+                        .toLowerCase() === "masuk"
                 );
+
             });
         const hadirUsernames = new Set(
             hadirHariIni.map(r => String(r.username || "").trim())

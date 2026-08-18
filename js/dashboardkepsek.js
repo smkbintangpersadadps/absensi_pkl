@@ -272,12 +272,22 @@ const KepsekDashboardService = {
             const siswa =
                 siswaData || [];
             // =============================================
-            // RANGE TANGGAL
+            // RANGE TANGGAL - WITA (UTC+8)
             // =============================================
+
             const startDate =
-                `${tanggal}T00:00:00`;
+                new Date(
+                    `${tanggal}T00:00:00+08:00`
+                ).toISOString();
+
             const endDate =
-                `${tanggal}T23:59:59.999`;
+                new Date(
+                    `${tanggal}T23:59:59.999+08:00`
+                ).toISOString();
+
+            console.log("Tanggal dashboard:", tanggal);
+            console.log("Start WITA:", startDate);
+            console.log("End WITA:", endDate);
             // =============================================
             // LOAD ABSENSI
             // =============================================
